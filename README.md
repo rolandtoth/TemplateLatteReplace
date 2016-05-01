@@ -296,7 +296,7 @@ $view->_filters['activeClass'] = function ($currentPage) {
 
 Every filter gets the preceding variable as the first parameter. In this case, the parameter "$currentPage" is "$page", because the filter was called on "$page" ("$page|activeClass").
 
-To specify more parameters use the ":" character:
+To specify parameters use the ":" character:
 
 ```php
 <body class="{$page->title|truncate:20}">
