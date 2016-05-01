@@ -1,0 +1,266 @@
+<?php namespace ProcessWire;
+
+use Latte\Engine;
+use Latte\Macros\MacroSet;
+use Nette\Application\UI\FakePresenter;
+
+/**
+ * Latte template engine support for ProcessWire.
+ * by Roland Toth (tpr)
+ *
+ * ProcessWire 2.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+/**
+ * Class TemplateLatteReplace
+ *
+ * @package ProcessWire
+ */
+class TemplateLatteReplace extends WireData implements Module, ConfigurableModule {
+
+    /**
+     * Basic information about module
+     */
+    public static function getModuleInfo() {
+        return array(
+            'title'    => 'Template Latte Replace',
+            'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
+            'href'     => '',
+            'author'   => 'Roland Toth',
+            'version'  => 10,
+            'autoload' => true,
+            'singular' => true,
+            'icon'     => 'code'
+        );
+    }
+
+    protected $latte;
+    public $cacheDir;
+    public $viewsDir;
+    public $defaultLayoutFile;
+    public $api_var;
+
+    /**
+     * Default configuration for module
+     *
+     */
+    static public function getDefaultData() {
+
+        return array(
+            "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
+            "api_var"           => 'view',
+            "viewsDir"          => 'views',
+            "defaultLayoutFile" => '@layout.latte'
+        );
+    }
+
+    /**
+     * Populate the default config data
+     *
+     */
+    public function __construct() {
+        foreach (self::getDefaultData() as $key => $value) {
+            $this->$key = $value;
+        }
+    }
+
+    /**
+     * Initialize the module and setup hooks
+     */
+    public function ready() {
+
+        /**
+         * Set new global api variable.
+         * Always added to avoid php error.
+         */
+        require_once __DIR__ . '/LatteView.php';
+
+        $this->wire($this->api_var, new LatteView());
+
+        if (wire('page')->template == 'admin') {
+            return;
+        }
+
+        // add common PW variables to view files
+        $fuelArray = array('page', 'pages', 'config', 'session', 'sanitizer', 'module', 'user', 'input');
+
+        foreach ($fuelArray as $fuel) {
+            $this->wire('view')->$fuel = wire($fuel);
+        }
+
+        $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
+    }
+
+
+    public function hookRender(HookEvent $event) {
+
+        $api_var = wire($this->api_var);
+
+        $templateFile = $event->object;
+
+        if ($templateFile->page->template == 'admin') {
+            return;
+        }
+
+        if ($templateFile->filename != "") {
+            // this is a page render, go ahead and process the output
+            $event->return = $this->renderLatteString($templateFile->filename, $api_var);
+        }
+    }
+
+    public function getLatte() {
+
+        // include files
+        require_once __DIR__ . '/FakePresenter.php';
+        require_once __DIR__ . '/latte/src/latte.php';
+
+        $latte = new Engine;
+        $latte->setTempDirectory(wire('config')->paths->cache . $this->cacheDir);
+
+        return $latte;
+    }
+
+
+    public function renderLatteString($templateFilename, $view) {
+
+        if (!isset($this->latte)) {
+
+            // get Latte
+            $this->latte = $this->getLatte();
+
+            // set default layout
+            $presenter = new FakePresenter();
+
+            $presenter->viewsDir = $this->viewsDir;
+            $presenter->defaultLayoutFile = $this->defaultLayoutFile;
+
+            $view->_control = $presenter;
+
+            // add filters
+            if (!empty($view->_filters)) {
+                foreach ($view->_filters as $key => $value) {
+                    $this->latte->addFilter($key, $value);
+                }
+            }
+
+            if (!empty($view->_addMacro)) {
+                $latte = $this->latte;
+                foreach ($view->_addMacro as $key => $value) {
+                    $this->val = $value;
+                    $latte->onCompile[] = function ($latte) {
+                        $value = $this->val;
+                        $set = new MacroSet($latte->getCompiler());
+                        $set->addMacro($value[0], $value[1], $value[2]);
+                    };
+                }
+            }
+        }
+
+        $filename = basename(basename($templateFilename), ".php");
+        $viewFile = isset($view->viewFile) ? $view->viewFile : $filename;
+
+        return $this->latte->rendertoString(wire('config')->paths->templates . $this->viewsDir . '/' . $viewFile . '.latte', (array)$view);
+    }
+
+    /**
+     * Create view directory on server
+     *
+     * @param $path
+     * @param $dirName
+     */
+    public static function createViewsDir($path, $dirName) {
+        if (!wire('input')->post->uninstall && !file_exists($path)) {
+            if (wireMkdir($path)) {
+                wire()->message(__CLASS__ . ': ' . __("new views directory created", __FILE__) . ': "' . $dirName . '" ' . __("in", __FILE__) . ' "' . wire('config')->urls->templates . '"');
+            } else {
+                wire()->error(__CLASS__ . ': ' . __("error creating new views directory (permission issue?)"));
+            }
+        }
+    }
+
+
+    /**
+     * Return an InputfieldWrapper of Inputfields used to configure the class
+     *
+     * @param array $data Array of config values indexed by field name
+     *
+     * @return InputfieldWrapper
+     *
+     */
+    public static function getModuleConfigInputfields(array $data) {
+
+        $defaultData = self::getDefaultData();
+        $data = array_merge($defaultData, $data);
+
+        // clear cache
+        if (wire('input')->post->submit_save_module) {
+            if (wire('input')->post->clearCache) {
+                $cacheDir = wire('config')->paths->cache . $data['cacheDir'];
+                if (file_exists($cacheDir)) {
+                    array_map('unlink', glob($cacheDir . "/*"));
+                    wire()->message(__CLASS__ . ': ' . __(" cache cleared successfully.", __FILE__));
+                }
+            }
+        }
+
+        // create new viewsDir if doesn't exist and show message in admin
+        $viewsDirName = wire('input')->post->viewsDir;
+        $path = wire('config')->paths->templates . $viewsDirName;
+
+        self::createViewsDir($path, $viewsDirName);
+
+        // show warning if views directory doesn't exist
+        if (!file_exists(wire('config')->paths->templates . $data['viewsDir']) && !wire('input')->post->viewsDir) {
+            wire()->warning(__CLASS__ . ': ' . __("views directory doesn't exist: ", __FILE__) . ' "' . $data['viewsDir'] . '" ' . __("in", __FILE__) . ' "' . wire('config')->urls->templates . '"');
+        }
+
+        $wrapper = new InputfieldWrapper();
+
+        $fieldName = 'api_var';
+        $f = wire('modules')->get("InputfieldText");
+        $f->attr('name', $fieldName);
+        $f->label = __('API variable', __FILE__);
+        $f->description = __('Name of the variable that is passed to the view files.', __FILE__);
+        $f->notes = __('Example: `view` (use as $view->myVar = ... in template files.)', __FILE__);
+        $f->columnWidth = 34;
+        $f->value = !empty($data[$fieldName]) ? wire('sanitizer')->varName(trim($data[$fieldName]), '/\\') : $defaultData[$fieldName];
+        $wrapper->add($f);
+
+        $fieldName = 'viewsDir';
+        $f = wire('modules')->get("InputfieldText");
+        $f->attr('name', $fieldName);
+        $f->label = __('Default directory for views', __FILE__);
+        $f->description = __('Directory name for .latte" files (relative to site/templates).', __FILE__);
+        $f->notes = __('Example: `views`', __FILE__);
+        $f->collapsed = 2;
+        $f->columnWidth = 33;
+        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
+        $wrapper->add($f);
+
+        $fieldName = 'defaultLayoutFile';
+        $f = wire('modules')->get("InputfieldText");
+        $f->attr('name', $fieldName);
+        $f->label = __('Default layout file', __FILE__);
+        $f->description = __('The base layout file that all views will use.', __FILE__);
+        $f->notes = __('Example: `@layout.latte` or `layouts/@default.latte`', __FILE__);
+        $f->collapsed = 2;
+        $f->columnWidth = 33;
+        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
+        $wrapper->add($f);
+
+        $f = wire('modules')->get("InputfieldCheckbox");
+        $f->attr('name', 'clearCache');
+        $f->label = __('Clear cache', __FILE__);
+        $f->description = __('If checked, Latte cache will be cleared on saving the module.', __FILE__);
+        $f->columnWidth = 34;
+        $wrapper->add($f);
+
+        return $wrapper;
+    }
+}

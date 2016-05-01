@@ -1,4 +1,4 @@
-sTemplate Latte Replace
+Template Latte Replace
 ================
 
 [Latte](https://latte.nette.org/) template engine support for [ProcessWire CMS](http://processwire.com/).
