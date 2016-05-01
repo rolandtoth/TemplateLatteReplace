@@ -73,7 +73,7 @@ There are many built-in filters and you even create your own ones. See the "Filt
 
 The main layout file contains the HTML skeleton for your site, with blocks in it. These blocks are filled with content from the view files. For example, on the homepage "views/home.latte" will be used, which extends the "@layout.latte" default layout.
 
-*Sample html layout ("@default.latte"):*
+*Sample layout ("@default.latte"):*
 
 ```php
 <!DOCTYPE html>
@@ -86,7 +86,7 @@ The main layout file contains the HTML skeleton for your site, with blocks in it
     <link rel="shortcut icon" href="{$config->urls->templates}favicon.ico">
 </head>
 
-<body class="page-{$page->id} template-{$template->name}">
+<body class="page-{$page->id} template-{$page->template->name}">
 
 <div>
 	{block header}
@@ -205,7 +205,7 @@ When being inside a loop, you can check the current iteration number by using $i
 
 When you need to add a class only if a condition evaluates to true, you can use the n:class macro.
 
-*Exammple: add 'active' class only if the $page name is 'services', plus always add classes "page" and "template-default":*
+*Example: add 'active' class only if the $page name is 'services', plus always add classes "page" and "template-default":*
 
 ```php
 <p n:class="$page->name == 'services' ? 'active', 'page template-default'"></p>
