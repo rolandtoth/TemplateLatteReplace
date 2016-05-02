@@ -311,19 +311,20 @@ The best place for filters is "_init.php", or in another file that ProcessWire a
 
 ### String translation
 
-You'll need to use a workaround here to be able to use multilanguage strings that will be translatable in ProcessWire's Language Translator.
+ProcessWire cannot recognize translatable strings in Latte files so some sort of trickery is needed here.
 
-The module comes with a helper function `t()` to simplify outputting translated strings.
+The module comes with a helper function `t()` and `n()` to solve this.
 
-First create a "_strings.php" in "/site/templates" (the comment tag is intentional):
+To make it work, first create a "_strings.php" in "/site/templates/" directory (the comment tag is intentional):
 
 ```php
 /*!
 _x('Read more', 'General');
 _x('Please select', 'Form');
+*/
 ```
 
-These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator. The first parameter passed to the _x() function is the string, the second is the context.
+These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator. The first parameter passed to the _x() function is the string to translate, the second is the context.
 
 Usage in view files:
 
@@ -332,9 +333,9 @@ Usage in view files:
 <p>{t('Please select', 'Form')}</p>
 ```
 
-Note that in the first example the context is not set because the `t()` function has the "General" context by default, so no need to explicitly add. The second example has the "Form" context, which will be visible in the Language Translator to make translations easier.
+Note that in the first example the context is not set because the `t()` function has the "General" context by default, so no need to explicitly add. The second example has the "Form" context, which will be visible in the Language Translator to make translations easier. You can add a third parameter if you would like to set the textdomain explicitly (if you need something else than "_strings.php").
 
-The drawback of this technique that strings need to be added in two places (in .latte file where they are used, and in _strings.php).
+The drawback of this technique that strings need to be added in two places (in .latte file where they are used plus in _strings.php).
 
 #### Using plurals
 
@@ -357,7 +358,7 @@ _x('add %d items', 'General');
 */
 ```
 
-So, if you add a translation in the admin for "add %d item" as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the function. Of course this example would make more sense when using with a non-English language.
+So if you add a translation in the admin for the example above as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the `n()` function. Of course this example would make more sense when using with a non-English language.
 
 **Using translator helper functions in template files**
 
