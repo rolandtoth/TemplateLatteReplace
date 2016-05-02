@@ -309,39 +309,13 @@ This will truncate the title at 20 characters ("truncate" is a default filter, [
 The best place for filters is _init.php, or in another file that ProcessWire always loads.
 
 
-### Multi-language strings
+### String translation
 
 You'll need to use a workaround here to be able to use multilanguage strings that will be translatable in ProcessWire's language translator.
 
-First, create a global $t variable in _init.php:
+The module comes with a helper function "t()" to simplify outputting translated strings.
 
-```php
-$view->t = function () {
-    return t(func_get_args());
-};
-```
-
-Second, create a t() function in _func.php:
-
-```php
-function t($args = null) {
-
-    $context = "General";
-    $textdomain = "/site/templates/_strings.php";
-
-    if (!is_array($args)) {
-        $args = func_get_args();
-    }
-
-    $text = isset($args[0]) ? $args[0] : "";
-    $context = isset($args[1]) ? $args[1] : $context;
-    $textdomain = isset($args[2]) ? $args[2] : $textdomain;
-
-    return _x($text, $context, $textdomain);
-}
-```
-
-Third, create a _strings.php in "/site/templates" (the starting comment tag is intentional):
+First create a _strings.php in "/site/templates" (the starting comment tag is intentional):
 
 ```php
 /*!
@@ -349,17 +323,41 @@ _x('Read more', 'General');
 _x('Please select', 'Form');
 ```
 
-These strings will be available in ProcessWire's translator.
+These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator.
 The first parameter passed to the _x() function is the string, the second is the context.
 
 Usage in view files:
 
 ```php
-<a href="{$page->url}">{$t('Read more')}</a>
-<p>{$t('Please select', 'Form')}</p>
+<a href="{$page->url}">{t('Read more')}</a>
+<p>{t('Please select', 'Form')}</p>
 ```
 
-Note that in the first example the context is not set because the t() function have the "General" context by default.
+Note that in the first example the context is not set because the t() function has the "General" context by default, so no need to explicitly add.
+The second example has the "Form" context, which will be visible in the Language Translator to make translations easier.
+
+#### Using plurals
+
+The module comes with another helper function called "n()":
+
+View file:
+
+```php
+{n("add %d item", "add %d items", $page->children()->count())}
+```
+
+Using the above line in a view file will print "add 1 item" or "add 99 items", according to the number of child pages $page has.
+
+You'll need to add two lines to "_strings.php" to make these strings translatable from the admin:
+
+```php
+/*!
+_x('add %d item', 'General');
+_x('add %d items', 'General');
+```
+
+So, if you add a translation in the admin for "add %d item" as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the function.
+Of course this makes better sense when using a non-English language.
 
 
 ## PhpStorm
@@ -398,5 +396,4 @@ The base layout file that all views will use.
 ### Clear cache
 
 If checked, Latte cache will be cleared on saving the module.
-
 
