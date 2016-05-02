@@ -33,7 +33,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 10,
+            'version'  => 12,
             'autoload' => true,
             'singular' => true,
             'icon'     => 'code'
@@ -93,6 +93,9 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         foreach ($fuelArray as $fuel) {
             $this->wire('view')->$fuel = wire($fuel);
         }
+
+        // add global helper functions
+        require_once(__DIR__ . '/global_functions.php');
 
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
     }
