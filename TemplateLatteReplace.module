@@ -4,6 +4,7 @@ use Latte\Engine;
 use Latte\Macros\MacroSet;
 use Nette\Application\UI\FakePresenter;
 
+
 /**
  * Latte template engine support for ProcessWire.
  * by Roland Toth (tpr)
