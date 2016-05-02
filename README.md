@@ -306,16 +306,16 @@ This will truncate the title at 20 characters ("truncate" is a default filter, [
 
 **Where to place filters?**
 
-The best place for filters is _init.php, or in another file that ProcessWire always loads.
+The best place for filters is "_init.php", or in another file that ProcessWire always loads.
 
 
 ### String translation
 
-You'll need to use a workaround here to be able to use multilanguage strings that will be translatable in ProcessWire's language translator.
+You'll need to use a workaround here to be able to use multilanguage strings that will be translatable in ProcessWire's Language Translator.
 
-The module comes with a helper function "t()" to simplify outputting translated strings.
+The module comes with a helper function `t()` to simplify outputting translated strings.
 
-First create a _strings.php in "/site/templates" (the starting comment tag is intentional):
+First create a "_strings.php" in "/site/templates" (the comment tag is intentional):
 
 ```php
 /*!
@@ -323,8 +323,7 @@ _x('Read more', 'General');
 _x('Please select', 'Form');
 ```
 
-These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator.
-The first parameter passed to the _x() function is the string, the second is the context.
+These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator. The first parameter passed to the _x() function is the string, the second is the context.
 
 Usage in view files:
 
@@ -333,12 +332,13 @@ Usage in view files:
 <p>{t('Please select', 'Form')}</p>
 ```
 
-Note that in the first example the context is not set because the t() function has the "General" context by default, so no need to explicitly add.
-The second example has the "Form" context, which will be visible in the Language Translator to make translations easier.
+Note that in the first example the context is not set because the `t()` function has the "General" context by default, so no need to explicitly add. The second example has the "Form" context, which will be visible in the Language Translator to make translations easier.
+
+The drawback of this technique that strings need to be added in two places (in .latte file where they are used, and in _strings.php).
 
 #### Using plurals
 
-The module comes with another helper function called "n()":
+The module comes with another helper function called `n()`:
 
 View file:
 
@@ -354,10 +354,18 @@ You'll need to add two lines to "_strings.php" to make these strings translatabl
 /*!
 _x('add %d item', 'General');
 _x('add %d items', 'General');
+*/
 ```
 
-So, if you add a translation in the admin for "add %d item" as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the function.
-Of course this makes better sense when using a non-English language.
+So, if you add a translation in the admin for "add %d item" as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the function. Of course this example would make more sense when using with a non-English language.
+
+**Using translator helper functions in template files**
+
+You can use `t()` and `n()` in your template php files too. For example when you need a translated string for an ajax success message:
+
+```php
+$successMessage = t('Success! You made it again.', 'Form');
+```
 
 
 ## PhpStorm
