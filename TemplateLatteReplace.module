@@ -4,7 +4,6 @@ use Latte\Engine;
 use Latte\Macros\MacroSet;
 use Nette\Application\UI\FakePresenter;
 
-
 /**
  * Latte template engine support for ProcessWire.
  * by Roland Toth (tpr)
@@ -34,7 +33,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 12,
+            'version'  => 13,
+            'requires' => array(
+                'PHP>=5.3.1',
+                'ProcessWire>=3.0.0'
+            ),
             'autoload' => true,
             'singular' => true,
             'icon'     => 'code'
@@ -95,7 +98,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             $this->wire('view')->$fuel = wire($fuel);
         }
 
-        // add global helper functions
+        // add global helper functions for string translation
         require_once(__DIR__ . '/global_functions.php');
 
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
@@ -118,6 +121,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
     }
 
+    /**
+     * Get the Latte engine.
+     *
+     * @return Engine
+     */
     public function getLatte() {
 
         // include files
@@ -130,7 +138,14 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         return $latte;
     }
 
-
+    /**
+     * @param $templateFilename
+     * @param $view
+     *
+     * @return string
+     * @throws \Exception
+     * @throws \Throwable
+     */
     public function renderLatteString($templateFilename, $view) {
 
         if (!isset($this->latte)) {
@@ -152,6 +167,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
                     $this->latte->addFilter($key, $value);
                 }
             }
+
+            // this makes _() work in .latte files
+            $this->latte->addFilter('translate', function () {
+                return _t(func_get_args());
+            });
 
             if (!empty($view->_addMacro)) {
                 $latte = $this->latte;
@@ -187,7 +207,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             }
         }
     }
-
 
     /**
      * Return an InputfieldWrapper of Inputfields used to configure the class
