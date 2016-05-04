@@ -311,63 +311,112 @@ The best place for filters is "_init.php", or in another file that ProcessWire a
 
 ### String translation
 
-ProcessWire cannot recognize translatable strings in Latte files so some sort of trickery is needed here.
+ProcessWire's Language Translator cannot parse strings from Latte files so a workaround is needed.
 
-The module comes with a helper function `t()` and `n()` to solve this.
+**_strings.php**
 
-To make it work, first create a "_strings.php" in "/site/templates/" directory (the comment tag is intentional):
+The module uses "/site/templates/_strings.php" file as a default textdomain where you have to list all the strings you use in view files.
+
+Create a "_strings.php" file in "/site/templates/" directory, then add your strings to it. Tthe comment tag is intentional to speed up parsing.
+
+*_strings.php example:*
 
 ```php
 /*!
-_x('Read more', 'General');
-_x('Please select', 'Form');
+__('Read more')
+__('Please select')
 */
 ```
 
-These strings will be available in ProcessWire's translator after you select "_strings.php" from the admin Language Translator. The first parameter passed to the _x() function is the string to translate, the second is the context.
+Now go the Language Translator in ProcessWire admin and in each language click on the "Translate File" button and select "_strings.php" from the list. Now you can enter translations for these strings in the admin.
 
-Usage in view files:
+In your view files use the `_` function (underscore) to get the translated string. You can use either `{_'string'}` or `{_('string')}` syntax:
 
 ```php
-<a href="{$page->url}">{t('Read more')}</a>
-<p>{t('Please select', 'Form')}</p>
+<a href="#">{_'Read more'}</a>
+<a href="#">{_('Read more')}</a>
 ```
 
-Note that in the first example the context is not set because the `t()` function has the "General" context by default, so no need to explicitly add. The second example has the "Form" context, which will be visible in the Language Translator to make translations easier. You can add a third parameter if you would like to set the textdomain explicitly (if you need something else than "_strings.php").
 
-The drawback of this technique that strings need to be added in two places (in .latte file where they are used plus in _strings.php).
+#### Using context or textdomain
+
+If you need to set a context or textdomain, use the following syntax in your view files:
+
+```php
+<a href="#">{_'Submit', 'Form'}</a>
+<a href="#">{_('Submit', 'Form', '/site/templates/_form-strings.php')}</a>
+```
+
+Using the example above will load the translation for string "Submit" using the context "Form", and using "/site/templates/_form-strings.php" as the textdomain (second line).
+
+In "_strings.php" (or "_form-strings.php") you'll need to use "_x" instead of "__". Also note that you have to add the context too:
+
+```php
+/*!
+_x('Submit', 'Form')
+*/
+```
+
+It is possible to use only `_x` in the textdomain file to avoid confusion. However, you must add the context to each string explicitly. The module uses the context "General" by default:
+
+```php
+/*!
+_x('Read more', 'General')
+*/
+```
+
 
 #### Using plurals
 
-The module comes with another helper function called `n()`:
+The module comes with another helper function called `__p()`:
 
 View file:
 
 ```php
-{n("add %d item", "add %d items", $page->children()->count())}
+{__p("add %d item", "add %d items", $page->children()->count())}
 ```
 
-Using the above line in a view file will print "add 1 item" or "add 99 items", according to the number of child pages $page has.
+Using the above line in a view file will print "add %d item" or "add %d items", according to the number of child pages $page has.
 
-You'll need to add two lines to "_strings.php" to make these strings translatable from the admin:
+**Value replacement**
+
+To add replacments for the placeholder, pass an array of them:
+
+```php
+<p>{__p("add %d %s item", "add %d %s items", 24, array(24, 'extraordinary'))}</p>
+```
+
+This will print "add 24 extraordinary items". Passing "1" instead of "24" would print "add 1 extraordinary item".
+
+To translate these strings, you'll need to add two lines to "_strings.php":
 
 ```php
 /*!
-_x('add %d item', 'General');
-_x('add %d items', 'General');
+__('add %d %s item')
+__('add %d %s items')
 */
 ```
 
-So if you add a translation in the admin for the example above as "Add %d monitors to cart", then the final outcome will be "Add 5 monitors to cart" if you pass 5 to the `n()` function. Of course this example would make more sense when using with a non-English language.
+**Context and textdomain with plurals**
+
+You can use context and textdomain with plurals too. The syntax in view file is:
+
+```php
+__p("singular", "plural", $count [, $replacementsArray], $context, $textdomain)
+```
+
 
 **Using translator helper functions in template files**
 
-You can use `t()` and `n()` in your template php files too. For example when you need a translated string for an ajax success message:
+You can use `_t()` for translation and `__p()` (or `_p()`, see below) for pluralization in your template php files:
 
 ```php
-$successMessage = t('Success! You made it again.', 'Form');
+$greetings = _t('Hello!');
+$successMessage = _t('Success! You made it again.', 'Form');
+$title = __p('%s orange', '%s oranges', $count, array('clockwork'));
 ```
 
+You can also use "_p" (single underscore) as an alias for "__p".
 
 ## PhpStorm
 
@@ -382,7 +431,7 @@ Additionally, add Latte tag attributes to HTML Inspections to make them availabl
 I have the following attributes added though the list is probably not complete:
 
 ```
-n:block,n:if,n:foreach,n:class,n:syntax,n:inner-foreach,n:tag-if,n:href,n:name,n:ifset
+n:block,n:if,n:ifset,n:foreach,n:inner-foreach,n:class,n:syntax,n:tag-if,n:href,n:name,n:attr
 ```
 
 With these settings PhpStorm will not mark Latte attributes as errors.
