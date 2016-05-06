@@ -7,7 +7,7 @@
      *
      * @return string
      */
-    function t($args = null) {
+    function _t($args = null) {
 
         $context = "General";
         $textdomain = "/site/templates/_strings.php";
@@ -30,7 +30,7 @@
      *
      * @return string
      */
-    function n($args = null) {
+    function _p($args = null) {
 
         if (!is_array($args)) {
             $args = func_get_args();
@@ -39,6 +39,19 @@
         $singular = isset($args[0]) ? $args[0] : "";
         $plural = isset($args[1]) ? $args[1] : "";
         $count = isset($args[2]) ? $args[2] : 1;
+        $replacements = isset($args[3]) ? $args[3] : array();
 
-        return sprintf(t(ProcessWire\_n($singular, $plural, $count)), $count);
+        // if 4 parameters are passed then add the fourth as the replacement array
+        if (is_array($replacements) && count($replacements)) {
+            return vsprintf(_t(ProcessWire\_n($singular, $plural, $count)), $replacements);
+        } else {
+            return _t(ProcessWire\_n($singular, $plural, $count));
+        }
+
+    }
+
+
+    // alias for _p()
+    function __p() {
+        return call_user_func_array('_p', func_get_args());
     }
