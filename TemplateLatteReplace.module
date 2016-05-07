@@ -33,7 +33,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 13,
+            'version'  => 14,
             'requires' => array(
                 'PHP>=5.3.1',
                 'ProcessWire>=3.0.0'
@@ -95,7 +95,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $fuelArray = array('page', 'pages', 'config', 'session', 'sanitizer', 'module', 'user', 'input');
 
         foreach ($fuelArray as $fuel) {
-            $this->wire('view')->$fuel = wire($fuel);
+            $this->wire($this->api_var)->$fuel = wire($fuel);
         }
 
         // add global helper functions for string translation
