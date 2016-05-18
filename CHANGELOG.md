@@ -1,6 +1,10 @@
 #Changelog
 
 
+### 0.1.5 (2016-05-18)
+
+- removed default context "General" to allow _'string' syntax
+
 
 ### 0.1.4 (2016-05-07)
 

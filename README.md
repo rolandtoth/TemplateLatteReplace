@@ -315,26 +315,26 @@ ProcessWire's Language Translator cannot parse strings from Latte files so a wor
 
 **_strings.php**
 
-The module uses "/site/templates/_strings.php" file as a default textdomain where you have to list all the strings you use in view files.
+The module uses "/site/templates/_strings.php" file as a default textdomain where you need to list all the strings you use in view files.
 
-Create a "_strings.php" file in "/site/templates/" directory, then add your strings to it. Tthe comment tag is intentional to speed up parsing.
+Create a "_strings.php" file in "/site/templates/" directory, then add your strings to it.
+
+For strings without context, use "__()", and use "_x() if you need to set a context:
 
 *_strings.php example:*
 
-```php
-/*!
+```txt
 __('Read more')
 __('Please select')
-*/
+_x('Learn more', 'Context')
 ```
 
-Now go the Language Translator in ProcessWire admin and in each language click on the "Translate File" button and select "_strings.php" from the list. Now you can enter translations for these strings in the admin.
+Now go the Language Translator in ProcessWire admin and in each language click on the "Translate File" button and select "_strings.php" from the list. Now you can enter translations for these strings.
 
-In your view files use the `_` function (underscore) to get the translated string. You can use either `{_'string'}` or `{_('string')}` syntax:
+In your view files use the `_` function (underscore) to get the translated string:
 
 ```php
 <a href="#">{_'Read more'}</a>
-<a href="#">{_('Read more')}</a>
 ```
 
 
@@ -344,25 +344,18 @@ If you need to set a context or textdomain, use the following syntax in your vie
 
 ```php
 <a href="#">{_'Submit', 'Form'}</a>
-<a href="#">{_('Submit', 'Form', '/site/templates/_form-strings.php')}</a>
+<a href="#">{_'Submit', 'Form', '/site/templates/_form-strings.php'}</a>
+<a href="#">{_'Submit', null, '/site/templates/_form-strings.php'}</a>
 ```
 
 Using the example above will load the translation for string "Submit" using the context "Form", and using "/site/templates/_form-strings.php" as the textdomain (second line).
 
-In "_strings.php" (or "_form-strings.php") you'll need to use "_x" instead of "__". Also note that you have to add the context too:
+Set context to `null` if you need no context but do need a textdomain.
 
-```php
-/*!
+In "_strings.php" (or "_form-strings.php") you'll need to use "_x" instead of double underscores. Also note that you have to add the context too:
+
+```txt
 _x('Submit', 'Form')
-*/
-```
-
-It is possible to use only `_x` in the textdomain file to avoid confusion. However, you must add the context to each string explicitly. The module uses the context "General" by default:
-
-```php
-/*!
-_x('Read more', 'General')
-*/
 ```
 
 
@@ -390,11 +383,9 @@ This will print "add 24 extraordinary items". Passing "1" instead of "24" would 
 
 To translate these strings, you'll need to add two lines to "_strings.php":
 
-```php
-/*!
+```txt
 __('add %d %s item')
 __('add %d %s items')
-*/
 ```
 
 **Context and textdomain with plurals**

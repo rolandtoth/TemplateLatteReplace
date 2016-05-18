@@ -3,24 +3,21 @@
     /**
      * Global helper function for string translation.
      *
-     * @param array|string $args
+     * @param array|string $args (text, context, textdomain)
      *
      * @return string
      */
     function _t($args = null) {
 
-        $context = "General";
-        $textdomain = "/site/templates/_strings.php";
-
-        if (!is_array($args)) {
-            $args = func_get_args();
-        }
+        if (!is_array($args)) $args = func_get_args();
 
         $text = isset($args[0]) ? $args[0] : "";
-        $context = isset($args[1]) ? $args[1] : $context;
-        $textdomain = isset($args[2]) ? $args[2] : $textdomain;
 
-        return ProcessWire\_x($text, $context, $textdomain);
+        if ($text == "") return "";
+
+        $textdomain = isset($args[2]) ? $args[2] : "/site/templates/_strings.php";
+
+        return isset($args[1]) ? ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
     }
 
     /**
@@ -49,7 +46,6 @@
         }
 
     }
-
 
     // alias for _p()
     function __p() {
