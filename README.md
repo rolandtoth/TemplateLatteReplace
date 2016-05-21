@@ -409,7 +409,9 @@ $title = __p('%s orange', '%s oranges', $count, array('clockwork'));
 
 You can also use "_p" (single underscore) as an alias for "__p".
 
-## PhpStorm
+## IDE and editor settings
+
+### PhpStorm
 
 PhpStorm has Nette and Latte plugins, but unfortunately the Latte plugin breaks the HTML autocomplete feature in Latte files. This can be solved by setting the “.latte” extension to be perceived as a Smarty file (see “File Types” in the Settings).
 
@@ -426,6 +428,22 @@ n:block,n:if,n:ifset,n:foreach,n:inner-foreach,n:class,n:syntax,n:tag-if,n:href,
 ```
 
 With these settings PhpStorm will not mark Latte attributes as errors.
+
+
+### Sublime Text 3
+
+Instructions for Sublime Text 3 (should work on 2 too):
+
+- Install Nette + Latte + Neon package
+- Install Smarty package
+- Set **latte** extension to open as **smarty** so you can keep the HTML code autcomplete working
+
+Bonus: install **HTML-CSS-JS Prettify** package and on its preferences add **latte** and **smarty** on allowed file extensions:
+
+```
+"html": {
+    "allowed_file_extensions": ["htm", "html", "xhtml", "shtml", "xml", "svg", "latte", "smarty"],
+```
 
 
 ## Module settings
