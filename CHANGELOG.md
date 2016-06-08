@@ -4,6 +4,8 @@
 ### 0.1.6 (2016-06-08)
 
 - enable setting template latte file with/without extension ($view->viewFile = 'basic-page' and $view->viewFile = 'basic-page.latte')
+- $view->json_encode returns JSON encoded string/markup. Possible values are true and PHP's json_encode options (eg. JSON_PRETTY_PRINT).
+- if "viewFile" begins with "//", $config->paths->templates and viewDir is not prepended to the view path
 
 
 

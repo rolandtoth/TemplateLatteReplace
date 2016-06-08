@@ -238,13 +238,36 @@ By default the module loads the view file identically named as the template php 
 
 ```php
 if ($page->id == 1035) {
-    $view->viewFile = 'services.lattes';
+    $view->viewFile = 'services.latte';
     // this will also work:
     $view->viewFile = 'services';
 }
 ```
 
 This will load "views/services.latte" instead. This feature enables dynamic switching of view files, so you can use the same (php) template for multiple pages and render different view files for example.
+
+
+####Disable prepending template path and view directory to viewFile
+
+If viewFile begins with "//", templates path and viewDir will be not prepended. The starting "//" is removed from the $viewFile by the module. This can be useful when you need to place latte files outside the views directory set in module config.
+
+```php
+// double slash indicates not to prepend $config->paths->templates and view directory
+$view->viewFile = '//' . $config->paths->root . 'archives.latte';
+```
+
+####Return JSON encoded markup
+
+Using $view->json_encode will instruct the module to return JSON encoded string (markup). This can be beneficial for ajax responses, for example.
+
+Possible values are `true` and PHP's json_encode options:
+
+```php
+$view->json_encode = true;
+$view->json_encode = JSON_PRETTY_PRINT;
+$view->json_encode = JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE;
+```
+
 
 ### Using wireRenderFile
 
