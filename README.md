@@ -238,11 +238,13 @@ By default the module loads the view file identically named as the template php 
 
 ```php
 if ($page->id == 1035) {
+    $view->viewFile = 'services.lattes';
+    // this will also work:
     $view->viewFile = 'services';
 }
 ```
 
-This will load "views/services.latte" instead. This feature enables dynamic switching of view files, so you can use the same template for multiple pages and render different view files for example.
+This will load "views/services.latte" instead. This feature enables dynamic switching of view files, so you can use the same (php) template for multiple pages and render different view files for example.
 
 ### Using wireRenderFile
 

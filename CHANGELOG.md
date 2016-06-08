@@ -1,9 +1,16 @@
 #Changelog
 
 
+### 0.1.6 (2016-06-08)
+
+- enable setting template latte file with/without extension ($view->viewFile = 'basic-page' and $view->viewFile = 'basic-page.latte')
+
+
+
 ### 0.1.5 (2016-05-18)
 
 - removed default context "General" to allow _'string' syntax
+
 
 
 ### 0.1.4 (2016-05-07)
