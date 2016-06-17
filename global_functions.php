@@ -17,7 +17,9 @@
 
         $textdomain = isset($args[2]) ? $args[2] : "/site/templates/_strings.php";
 
-        return isset($args[1]) ? ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
+        $string = isset($args[1]) ? ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
+
+        return html_entity_decode($string);
     }
 
     /**

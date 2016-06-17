@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.1.7 (2016-06-17)
+
+- run translated strings through html_entity_decode() (suggested by adrianmak)
+
+
+
 ### 0.1.6 (2016-06-08)
 
 - enable setting template latte file with/without extension ($view->viewFile = 'basic-page' and $view->viewFile = 'basic-page.latte')
