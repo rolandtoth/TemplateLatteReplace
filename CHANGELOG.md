@@ -1,6 +1,13 @@
 #Changelog
 
 
+### 0.1.8 (2016-06-30)
+
+- Latte updated to 2.4
+- removed FakePresenter because there's built-in way to set default layout file in v2.4
+
+
+
 ### 0.1.7 (2016-06-17)
 
 - run translated strings through html_entity_decode() (suggested by adrianmak)
