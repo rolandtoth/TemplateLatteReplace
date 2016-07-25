@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.1.9 (2016-07-25)
+
+- added htmlspecialchars_decode for the global _t() translation helper 
+
+
+
 ### 0.1.8 (2016-06-30)
 
 - Latte updated to 2.4
