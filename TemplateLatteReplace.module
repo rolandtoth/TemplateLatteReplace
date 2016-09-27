@@ -32,7 +32,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 19,
+            'version'  => 20,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -83,7 +83,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $this->wire($this->api_var, new LatteView());
 
-        if (wire('page')->template == 'admin') {
+        if ($this->wire('page')->template == 'admin') {
             return;
         }
 
@@ -91,7 +91,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $fuelArray = array('page', 'pages', 'config', 'session', 'sanitizer', 'module', 'user', 'input');
 
         foreach ($fuelArray as $fuel) {
-            $this->wire($this->api_var)->$fuel = wire($fuel);
+            $this->wire($this->api_var)->$fuel = $this->wire($fuel);
         }
 
         // add global helper functions for string translation
@@ -103,7 +103,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     public function hookRender(HookEvent $event) {
 
-        $api_var = wire($this->api_var);
+        $api_var = $this->wire($this->api_var);
 
         $templateFile = $event->object;
 
@@ -129,12 +129,12 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             require_once __DIR__ . '/lib/vendor/autoload.php';
 
             $latte = new Engine;
-            $latte->setTempDirectory(wire('config')->paths->cache . $this->cacheDir);
+            $latte->setTempDirectory($this->wire('config')->paths->cache . $this->cacheDir);
 
             // set default layout file (as of Latte 2.4)
             $latte->addProvider('coreParentFinder', function ($template) {
                 if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
-                    return $this->defaultLayoutFile;
+                    return $this->config->paths->templates . $this->viewsDir . '/' . $this->defaultLayoutFile;
                 }
             });
 
@@ -193,7 +193,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             // remove the starting "//" characters
             $viewFile = substr($viewFile, 2);
         } else {
-            $viewRootDir = wire('config')->paths->templates . $this->viewsDir . '/';
+            $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
         }
 
         $markup = $this->latte->renderToString($viewRootDir . $viewFile . '.latte', (array) $view);

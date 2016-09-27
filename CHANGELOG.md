@@ -1,6 +1,11 @@
 #Changelog
 
 
+### 0.2.0 (2016-09-27)
+
+- use absolute path for default layout file
+
+
 ### 0.1.9 (2016-07-25)
 
 - added htmlspecialchars_decode for the global _t() translation helper 
