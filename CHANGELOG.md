@@ -1,6 +1,11 @@
 #Changelog
 
 
+### 0.2.1 (2016-10-07)
+
+- do not process HannaCode renders
+
+
 ### 0.2.0 (2016-09-27)
 
 - use absolute path for default layout file
