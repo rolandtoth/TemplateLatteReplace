@@ -32,7 +32,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 22,
+            'version'  => 24,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -56,7 +56,25 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
             "api_var"           => 'view',
             "viewsDir"          => 'views',
-            "defaultLayoutFile" => '@layout.latte'
+            "defaultLayoutFile" => '@layout.latte',
+            "options"           => array(
+                'extraMacros',
+                'extraFilters'
+            ),
+            "fuels"             => array(
+                'config',
+                'fields',
+                'input',
+                'languages',
+                'log',
+                'module',
+                'page',
+                'pages',
+                'sanitizer',
+                'session',
+                'templates',
+                'user'
+            )
         );
     }
 
@@ -73,6 +91,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     /**
      * Initialize the module and setup hooks
      */
+
     public function ready() {
 
         /**
@@ -87,15 +106,25 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             return;
         }
 
-        // add common PW variables to view files
-        $fuelArray = array('page', 'pages', 'config', 'session', 'sanitizer', 'module', 'user', 'input');
+        $defaultData = self::getDefaultData();
 
-        foreach ($fuelArray as $fuel) {
+        // add common PW variables to view files
+//        foreach ($this->fuels as $fuel) {
+        foreach ($defaultData['fuels'] as $fuel) {
             $this->wire($this->api_var)->$fuel = $this->wire($fuel);
         }
 
         // add global helper functions for string translation
         require_once(__DIR__ . '/global_functions.php');
+
+        // include macros and filters
+        if (in_array('extraMacros', $this->options)) {
+            require_once __DIR__ . '/_macros.php';
+        }
+
+        if (in_array('extraFilters', $this->options)) {
+            require_once __DIR__ . '/_filters.php';
+        }
 
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
     }
@@ -131,7 +160,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         if (!isset($this->latte)) {
 
-            require_once __DIR__ . '/lib/vendor/autoload.php';
+            require_once __DIR__ . '/latte/latte.php';
 
             $latte = new Engine;
             $latte->setTempDirectory($this->wire('config')->paths->cache . $this->cacheDir);
@@ -183,6 +212,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $filename = basename(basename($templateFilename), ".php");
         $viewFile = isset($view->viewFile) ? $view->viewFile : $filename;
+
 
         // enable template file with/without extension
         $viewFile = str_replace('.latte', '', $viewFile);
@@ -265,6 +295,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->description = __('Name of the variable that is passed to the view files.', __FILE__);
         $f->notes       = __('Example: `view` (use as $view->myVar = ... in template files.)', __FILE__);
         $f->columnWidth = 34;
+        $f->collapsed   = Inputfield::collapsedNever;
         $f->value       = !empty($data[ $fieldName ]) ? wire('sanitizer')->varName(trim($data[ $fieldName ]), '/\\') : $defaultData[ $fieldName ];
         $wrapper->add($f);
 
@@ -276,6 +307,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->notes       = __('Example: `views`', __FILE__);
         $f->collapsed   = 2;
         $f->columnWidth = 33;
+        $f->collapsed   = Inputfield::collapsedNever;
         $f->value       = !empty($data[ $fieldName ]) ? trim($data[ $fieldName ], '/\\') : $defaultData[ $fieldName ];
         $wrapper->add($f);
 
@@ -287,15 +319,51 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->notes       = __('Example: `@layout.latte` or `layouts/@default.latte`', __FILE__);
         $f->collapsed   = 2;
         $f->columnWidth = 33;
+        $f->collapsed   = Inputfield::collapsedNever;
         $f->value       = !empty($data[ $fieldName ]) ? trim($data[ $fieldName ], '/\\') : $defaultData[ $fieldName ];
+        $wrapper->add($f);
+
+        $fieldName    = 'options';
+        $f            = wire('modules')->get('InputfieldCheckboxes');
+        $f->name      = $fieldName;
+        $f->label     = __('Options', __FILE__);
+        $f->collapsed = Inputfield::collapsedNever;
+
+        $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
+        $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
+
+        if (isset($data[ $fieldName ])) {
+            $f->attr('value', $data[ $fieldName ]);
+        }
         $wrapper->add($f);
 
         $f = wire('modules')->get("InputfieldCheckbox");
         $f->attr('name', 'clearCache');
         $f->label       = __('Clear cache', __FILE__);
         $f->description = __('If checked, Latte cache will be cleared on saving the module.', __FILE__);
+        $f->collapsed   = Inputfield::collapsedNever;
         $f->columnWidth = 34;
         $wrapper->add($f);
+
+
+//        $fieldName = 'fuels';
+//        $f         = wire('modules')->get("InputfieldCheckboxes");
+//        $f->attr('name', $fieldName);
+//        $f->label       = __('API variables', __FILE__);
+//        $f->description = __('Check which API variables should be available by default in the view files.', __FILE__);
+//        $f->columnWidth = 100;
+//        $f->collapsed   = Inputfield::collapsedNever;
+//
+////        foreach ($defaultData[$fieldName] as $fuelName) {
+//        foreach ($data['allFuels'] as $fuelName) {
+//            $f->addOption($fuelName, '$' . $fuelName);
+//        }
+//
+//        if (isset($data[ $fieldName ]) && $data[ $fieldName ]) {
+//            $f->attr('value', $data[ $fieldName ]);
+//        }
+//
+//        $wrapper->add($f);
 
         return $wrapper;
     }

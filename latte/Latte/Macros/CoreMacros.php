@@ -207,13 +207,18 @@ class CoreMacros extends MacroSet
 	public function macroTranslate(MacroNode $node, PhpWriter $writer)
 	{
 		if ($node->closing) {
-			return $writer->write('$_fi = new LR\FilterInfo(%var); echo %modifyContent($this->filters->filterContent("translate", $_fi, ob_get_clean()))', $node->context[0]);
+			if (strpos($node->content, '<?php') === FALSE) {
+				$value = var_export($node->content, TRUE);
+				$node->content = '';
+			} else {
+				$node->openingCode = '<?php ob_start(function () {}) ?>' . $node->openingCode;
+				$value = 'ob_get_clean()';
+			}
+
+			return $writer->write('$_fi = new LR\FilterInfo(%var); echo %modifyContent($this->filters->filterContent("translate", $_fi, %raw))', $node->context[0], $value);
 
 		} elseif ($node->empty = ($node->args !== '')) {
 			return $writer->write('echo %modify(call_user_func($this->filters->translate, %node.args))');
-
-		} else {
-			return 'ob_start(function () {})';
 		}
 	}
 
@@ -290,21 +295,10 @@ class CoreMacros extends MacroSet
 		if ($node->modifiers || $node->args) {
 			throw new CompileException('Modifiers and arguments are not allowed in ' . $node->getNotation());
 		}
-		if (!$node->closing) {
-			return;
-		} elseif ($node->prefix) { // preserve trailing whitespaces
-			preg_match('#^(\s*)(.*?)(\s*)\z#s', $node->content, $parts);
-			$node->content = $parts[2];
-		}
-
-		$node->content = preg_replace('#[ \t\r\n]+#', ' ', $node->content);
-
-		if (in_array($node->context[0], [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)) {
-			$node->content = preg_replace('#(?<=>) | (?=<)#', '', $node->content);
-			if ($node->prefix) {
-				$node->content = $parts[1] . $node->content . $parts[3];
-			}
-		}
+		$node->openingCode = in_array($node->context[0], [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)
+			? '<?php ob_start(function ($s, $phase) { static $strip = TRUE; return LR\Filters::spacelessHtml($s, $phase, $strip); }, 4096); ?>'
+			: "<?php ob_start('Latte\\Runtime\\Filters::spacelessText', 4096); ?>";
+		$node->closingCode = '<?php ob_end_flush(); ?>';
 	}
 
 

@@ -1,14 +1,35 @@
 #Changelog
 
 
+### 0.2.4 (2016-12-06)
+
+- added additional filters and macros (optional, see README)
+- added 'languages', 'fields', 'templates', 'logs' to the default API variables (suggested by Pixrael)
+
+
+### 0.2.3 (2016-11-22)
+
+- Latte upgraded to 2.4.2
+- do not use autoloader for loading Latte (fixes FileCompiler issues)
+
+
+
+### 0.2.2 (2016-11-15)
+
+- multiple macros fix
+
+
+
 ### 0.2.1 (2016-10-07)
 
 - do not process HannaCode renders
 
 
+
 ### 0.2.0 (2016-09-27)
 
 - use absolute path for default layout file
+
 
 
 ### 0.1.9 (2016-07-25)

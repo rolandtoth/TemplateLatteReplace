@@ -55,6 +55,7 @@ class Filters
 	 */
 	public static function escapeHtmlAttr($s, $double = TRUE)
 	{
+		$double = $double && $s instanceof IHtmlString ? FALSE : $double;
 		$s = (string) $s;
 		if (strpos($s, '`') !== FALSE && strpbrk($s, ' <>"\'') === FALSE) {
 			$s .= ' '; // protection against innerHTML mXSS vulnerability nette/nette#1496
@@ -252,6 +253,7 @@ class Filters
 				'htmlAttrJs' => 'escapeHtmlAttr', 'xhtmlAttrJs' => 'escapeHtmlAttr',
 				'htmlAttrCss' => 'escapeHtmlAttr', 'xhtmlAttrCss' => 'escapeHtmlAttr',
 				'htmlAttrUrl' => 'escapeHtmlAttr', 'xhtmlAttrUrl' => 'escapeHtmlAttr',
+				'htmlComment' => 'escapeHtmlComment', 'xhtmlComment' => 'escapeHtmlComment',
 				'xml' => 'escapeXml', 'xmlAttr' => 'escapeXml',
 			],
 			Engine::CONTENT_JS => [
@@ -259,24 +261,28 @@ class Filters
 				'htmlAttr' => 'escapeHtmlAttr', 'xhtmlAttr' => 'escapeHtmlAttr',
 				'htmlAttrJs' => 'escapeHtmlAttr', 'xhtmlAttrJs' => 'escapeHtmlAttr',
 				'htmlJs' => 'escapeHtmlRawText', 'xhtmlJs' => 'escapeHtmlRawText',
+				'htmlComment' => 'escapeHtmlComment', 'xhtmlComment' => 'escapeHtmlComment',
 			],
 			Engine::CONTENT_CSS => [
 				'html' => 'escapeHtmlText', 'xhtml' => 'escapeHtmlText',
 				'htmlAttr' => 'escapeHtmlAttr', 'xhtmlAttr' => 'escapeHtmlAttr',
 				'htmlAttrCss' => 'escapeHtmlAttr', 'xhtmlAttrCss' => 'escapeHtmlAttr',
 				'htmlCss' => 'escapeHtmlRawText', 'xhtmlCss' => 'escapeHtmlRawText',
+				'htmlComment' => 'escapeHtmlComment', 'xhtmlComment' => 'escapeHtmlComment',
 			],
 			Engine::CONTENT_HTML => [
 				'htmlAttr' => 'escapeHtmlAttrConv',
 				'htmlAttrJs' => 'escapeHtmlAttrConv',
 				'htmlAttrCss' => 'escapeHtmlAttrConv',
 				'htmlAttrUrl' => 'escapeHtmlAttrConv',
+				'htmlComment' => 'escapeHtmlComment',
 			],
 			Engine::CONTENT_XHTML => [
 				'xhtmlAttr' => 'escapeHtmlAttrConv',
 				'xhtmlAttrJs' => 'escapeHtmlAttrConv',
 				'xhtmlAttrCss' => 'escapeHtmlAttrConv',
 				'xhtmlAttrUrl' => 'escapeHtmlAttrConv',
+				'xhtmlComment' => 'escapeHtmlComment',
 			],
 		];
 		return isset($table[$source][$dest]) ? [__CLASS__, $table[$source][$dest]] : NULL;
@@ -302,18 +308,50 @@ class Filters
 	 */
 	public static function strip(FilterInfo $info, $s)
 	{
-		trigger_error('Filter |strip is deprecated, use macro {spaceless}', E_USER_DEPRECATED);
-		if (in_array($info->contentType, [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)) {
-			return preg_replace_callback(
-				'#(</textarea|</pre|</script|^(?!<textarea|<pre|<script)).*?(?=<textarea|<pre|<script|\z)#si',
-				function ($m) {
-					return trim(preg_replace('#[ \t\r\n]+#', ' ', $m[0]));
-				},
-				$s
-			);
-		} else {
-			return trim(preg_replace('#[ \t\r\n]+#', ' ', $s));
+		return in_array($info->contentType, [Engine::CONTENT_HTML, Engine::CONTENT_XHTML], TRUE)
+			? trim(self::spacelessHtml($s))
+			: trim(self::spacelessText($s));
+	}
+
+
+	/**
+	 * Replaces all repeated white spaces with a single space.
+	 * @param  string HTML
+	 * @param  int output buffering phase
+	 * @param  bool stripping mode
+	 * @return string HTML
+	 */
+	public static function spacelessHtml($s, $phase = NULL, & $strip = TRUE)
+	{
+		if ($phase & PHP_OUTPUT_HANDLER_START) {
+			$s = ltrim($s);
 		}
+		if ($phase & PHP_OUTPUT_HANDLER_FINAL) {
+			$s = rtrim($s);
+		}
+		return preg_replace_callback(
+			'#[ \t\r\n]+|<(/)?(textarea|pre|script)(?=\W)#si',
+			function ($m) use (& $strip) {
+				if (empty($m[2])) {
+					return $strip ? ' ' : $m[0];
+				} else {
+					$strip = !empty($m[1]);
+					return $m[0];
+				}
+			},
+			$s
+		);
+	}
+
+
+	/**
+	 * Replaces all repeated white spaces with a single space.
+	 * @param  string text
+	 * @return string text
+	 */
+	public static function spacelessText($s)
+	{
+		return preg_replace('#[ \t\r\n]+#', ' ', $s);
 	}
 
 

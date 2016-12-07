@@ -169,7 +169,7 @@ Read more on blocks [here](https://latte.nette.org/en/macros#toc-blocks).
 
 ### Macros
 
-Macros can be used for conditionals or loops.
+Macros can be used for conditionals or loops. You can create custom macros too, see below.
 
 ```php
 {if $page->body}
@@ -301,7 +301,7 @@ $view->contactPage = $pages->get(1044);
 
 ### Filters
 
-You can make your own filters by adding new items to the "$view->_filters" array.
+You can make your own filters by adding new items to the "$view->_filters" array. From v2.4 there are some default filters available too (see below).
 
 *Example: add "activeClass" filter:*
 
@@ -331,7 +331,175 @@ This will truncate the title at 20 characters ("truncate" is a default filter, [
 
 **Where to place filters?**
 
-The best place for filters is "_init.php", or in another file that ProcessWire always loads.
+The best place for filters is "/site/ready.php", or another file that ProcessWire always loads.
+
+
+### Built-in filters and macros (from v2.4)
+
+There are a few custom (convenience) filters and macros to use in view files.
+
+
+#### Additional macros
+
+The module comes with a few helper macros. If you don't need them you can disable in the module's settings page.
+
+**iff**
+
+An IF condition that sets a variable "$x" to the value of the condition. In the example below "$x" will be "$page->body", making easier to replace "body" if you need for example "title" instead.
+
+```php
+<div n:iff="$page->body">
+    {$x|noescape}
+</div>
+```
+
+```php
+{iff $page->body}
+    {$x|noescape}
+{/iff}
+```
+
+**page**
+
+If you need to switch to a page quickly, use the "page" macro. It accepts a page ID (or a selector). It automatically sets the "$p" variable too. Under the hood it uses the $pages->get() API command.
+
+
+```php
+<div n:page="1039">
+    {$p->title}
+</div>
+```
+
+```php
+{page 'template=home'}
+    {$p->title}
+{/page}
+```
+
+**pages**
+
+Simlar to the "page" filter but returns a PageArray (loaded to "$pArr") instead of a single page. Under the hood it uses the $pages->find() API command.
+
+
+```php
+<ul n:pages="template=basic-page,limit=10" n:inner-foreach="$pArr as $p">
+    <li>{$p->title}</li>
+</ul>
+```
+
+```php
+{pages 'template=basic-page,limit=10'}
+<ul n:inner-foreach="$pArr as $p">
+    <li>{$p->title}</li>
+</ul>
+{/pages}
+```
+
+
+**setvar**
+
+This is an alternative to the built-in "var" macro and allows setting a variable "inline", that is, adding to a tag for example.
+
+```php
+<div n:setvar="url,$p->url">
+    {$url}
+</div>
+```
+
+
+#### Additonal filters
+
+The module comes with a few additional helper filters. If you don't need them you can disable in the module's settings page.
+
+**activeClass**
+
+Adds an 'active' class if the Page passed is the current page, or it is a children of the parent page (multi-level). Useful for navigation items or sliders for example. You can change the default className to another one by passing it as a parameter (added using  ":'current'" in the following snippet). Note that you need to take care of the spaces if you use another classes on the element.
+
+```php
+<ul n:inner-foreach="$menuItems as $p">
+    <li class="menu-item {$p|activeClass:'current'}">
+        <a href="{$p->url)}">{$p->title|noescape}</a>
+    </li>
+</ul>
+```
+
+
+**bodyClass**
+
+Adds some classes to the element (preferably to the "body") reflecting the page ID, template and user language (if applicable):
+
+- page ID: eg. "page-1032"
+- template name: "template-basic-page" (or "home" in case of the homepage)
+- language: "lang-default"
+
+```php
+<body class="{$page|bodyClass}">
+```
+
+
+**getPage**
+
+This is a "filter" version of the macro "page" (see above) that makes really easy to reference a page by ID or selector.
+
+Note: use parenthesis to access the returned Page object's methods.
+
+```php
+<p>
+    {(1|getPage)->title}
+</p>
+```
+
+```php
+<p>
+    {(1|getPage)->getLanguageValue('de', 'title')}
+</p>
+
+
+**getPages**
+
+This is a "filter" version of the macro "pages" (see above). The difference is that you can pass an extra selector too.
+
+```php
+<p n:foreach="('parent=1088'|getPages) as $p">
+    {$p->title|noescape}
+</p>
+
+{* $view->servicesPages is set in ready.php and contains "template=service,sort=-created" *}
+{* now get only 6 of them *}
+<p n:foreach="($servicePages|getPages:'limit=6') as $p">
+    {$p->title|noescape}
+</p>
+```
+
+
+**niceUrl**
+
+Removes "http(s)" and/or "www" from a link, useful for outputting shorter links.
+
+```php
+{* remove www and http *}
+<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl}</a>
+{* remove "http" only *}
+<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'http'}</a>
+{* remove "www" only *}
+<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'www'}</a>
+{* remove trailing "/" *}
+<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'/'}</a>
+{* remove "www" and trailing "/" *}
+<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'www/'}</a>
+```
+
+
+**onlyNumbers**
+
+Removes everything other than numbers. You could also use the built-in "replaceRE" filter.
+
+```php
+<p>
+    {$page->phone|onlyNumbers}
+</p>
+```
+
 
 
 ### String translation

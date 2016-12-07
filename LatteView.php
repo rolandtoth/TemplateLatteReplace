@@ -6,5 +6,4 @@
  * @package ProcessWire
  */
 class LatteView {
-
 }
