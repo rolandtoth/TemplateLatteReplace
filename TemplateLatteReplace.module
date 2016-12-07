@@ -88,6 +88,15 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
     }
 
+    public function ___uninstall() {
+        // remove cache dir
+        $cacheDir = wire('config')->paths->cache . $this->cacheDir;
+
+        if(wireRmdir($cacheDir, true)) {
+            $this->message(__CLASS__ . ': ' . __(" cache directory removed successfully.", __FILE__));
+        }
+    }
+
     /**
      * Initialize the module and setup hooks
      */
