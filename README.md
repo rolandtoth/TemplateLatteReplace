@@ -301,7 +301,7 @@ $view->contactPage = $pages->get(1044);
 
 ### Filters
 
-You can make your own filters by adding new items to the "$view->_filters" array. From v2.4 there are some default filters available too (see below).
+You can make your own filters by adding new items to the "$view->_filters" array. From v2.4 there are some additional filters available too (see below).
 
 *Example: add "activeClass" filter:*
 
@@ -334,9 +334,9 @@ This will truncate the title at 20 characters ("truncate" is a default filter, [
 The best place for filters is "/site/ready.php", or another file that ProcessWire always loads.
 
 
-### Built-in filters and macros (from v2.4)
+### Additional filters and macros (from v2.4)
 
-There are a few custom (convenience) filters and macros to use in view files.
+There are a few additional (convenience) filters and macros to use in view files.
 
 
 #### Additional macros
