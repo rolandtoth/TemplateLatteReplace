@@ -43,6 +43,8 @@ In "views/home.latte" view file:
 </ul>
 ```
 
+From v0.2.5 it is possible to use latte files only and remove template php files. See the "Use latte extension" feature for details.
+
 
 ## Latte basics
 
@@ -641,13 +643,17 @@ Bonus: install **HTML-CSS-JS Prettify** package and on its preferences add **lat
 ```php
 {_'A technical book', 'Books'}
 ```
+
 May result in
+
 ```php
 {_'A 
 technical 
 book', 'Books'}
 ```
-so it won't appear translated any more. You'll have to remove the line breaks manually (for now). 
+
+so it won't appear translated any more. You'll have to remove the line breaks manually (for now).
+
 ## Module settings
 
 ### API variable
@@ -662,7 +668,12 @@ Directory name for .latte" files (relative to site/templates).
 
 The base layout file that all views will use.
 
+### Options
+
+- Load additional macros: whether to include additional macros (from v2.4)
+- Load additional filters: whether to include additional filters (from v2.4)
+- Use latte extension: if checked, you can remove PHP tempate files and use only Latte files. Note: admin.php must be renamed to admin.latte if you check this. For PHP logic you can still use ready.php (or _init.php) and use conditionals to target specific templates (eg. if($page->template == 'basic-page')).
+
 ### Clear cache
 
 If checked, Latte cache will be cleared on saving the module.
-

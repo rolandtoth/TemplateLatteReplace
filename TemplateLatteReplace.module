@@ -32,7 +32,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 24,
+            'version'  => 25,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -55,10 +55,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         return array(
             "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
             "api_var"           => 'view',
-            "viewsDir"          => 'views',
+            "viewsDir"          => '',
             "defaultLayoutFile" => '@layout.latte',
             "options"           => array(
                 'extraMacros',
+            	'useLatteExtension',
                 'extraFilters'
             ),
             "fuels"             => array(
@@ -96,6 +97,12 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             $this->message(__CLASS__ . ': ' . __(" cache directory removed successfully.", __FILE__));
         }
     }
+
+    public function init() {
+	    if (in_array('useLatteExtension', $this->options)) {
+			$this->wire('config')->templateExtension = 'latte';
+	    }
+	}
 
     /**
      * Initialize the module and setup hooks
@@ -245,22 +252,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
     /**
-     * Create view directory on server
-     *
-     * @param $path
-     * @param $dirName
-     */
-    public static function createViewsDir($path, $dirName) {
-        if (!wire('input')->post->uninstall && !file_exists($path)) {
-            if (wireMkdir($path)) {
-                wire()->message(__CLASS__ . ': ' . __("new views directory created", __FILE__) . ': "' . $dirName . '" ' . __("in", __FILE__) . ' "' . wire('config')->urls->templates . '"');
-            } else {
-                wire()->error(__CLASS__ . ': ' . __("error creating new views directory (permission issue?)"));
-            }
-        }
-    }
-
-    /**
      * Return an InputfieldWrapper of Inputfields used to configure the class
      *
      * @param array $data Array of config values indexed by field name
@@ -283,12 +274,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
                 }
             }
         }
-
-        // create new viewsDir if doesn't exist and show message in admin
-        $viewsDirName = wire('input')->post->viewsDir;
-        $path         = wire('config')->paths->templates . $viewsDirName;
-
-        self::createViewsDir($path, $viewsDirName);
 
         // show warning if views directory doesn't exist
         if (!file_exists(wire('config')->paths->templates . $data['viewsDir']) && !wire('input')->post->viewsDir) {
@@ -340,6 +325,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
         $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
+        $f->addOption('useLatteExtension', __('Use `latte` extension - WARNING: rename "admin.php" to "admin.latte" manually!', __FILE__));
 
         if (isset($data[ $fieldName ])) {
             $f->attr('value', $data[ $fieldName ]);

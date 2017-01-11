@@ -1,10 +1,18 @@
 #Changelog
 
 
+### 0.2.5 (2017-01-10)
+
+- option to replace PHP templates with Latte files (needs manual renaming admin.php to admin.latte)
+- removed automatic views directory creation feature
+
+
+
 ### 0.2.4 (2016-12-06)
 
 - added additional filters and macros (optional, see README)
 - added 'languages', 'fields', 'templates', 'logs' to the default API variables (suggested by Pixrael)
+
 
 
 ### 0.2.3 (2016-11-22)
