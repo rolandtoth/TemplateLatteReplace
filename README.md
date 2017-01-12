@@ -672,7 +672,7 @@ The base layout file that all views will use.
 
 - Load additional macros: whether to include additional macros (from v2.4)
 - Load additional filters: whether to include additional filters (from v2.4)
-- Use latte extension: if checked, you can remove PHP tempate files and use only Latte files. Note: admin.php must be renamed to admin.latte if you check this. For PHP logic you can still use ready.php (or _init.php) and use conditionals to target specific templates (eg. if($page->template == 'basic-page')).
+- Use latte extension: if checked, you can remove PHP tempate files and use only Latte files (from v2.5). Note: `admin.php` must be renamed to `admin.latte` if you check this (or alternatively create `admin.latte` file next to `admin.php` and add `require('./admin.php');` to it). For PHP logic you can still use ready.php (or _init.php) and use conditionals to target specific templates (eg. `if($page->template == 'basic-page')`).
 
 ### Clear cache
 
