@@ -1,7 +1,13 @@
 Template Latte Replace
 ================
 
-[Latte](https://latte.nette.org/) template engine support for [ProcessWire CMS](http://processwire.com/).
+[Nette Latte](https://latte.nette.org/) template engine support for [ProcessWire CMS](http://processwire.com/).
+
+
+## Links
+
+[Modules Directory](http://modules.processwire.com/modules/template-latte-replace/)
+[ProcessWire forum topic](https://processwire.com/talk/topic/13168-module-template-latte-replace/)
 
 
 ## Install
