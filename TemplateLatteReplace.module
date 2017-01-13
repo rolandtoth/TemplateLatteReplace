@@ -32,9 +32,9 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 26,
+            'version'  => 25,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
-            'autoload' => 'template!=admin',
+            'autoload' => true,
             'singular' => true,
             'icon'     => 'code'
         );
