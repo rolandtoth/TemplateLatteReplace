@@ -32,9 +32,9 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 25,
+            'version'  => 26,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
-            'autoload' => true,
+            'autoload' => 'template!=admin',
             'singular' => true,
             'icon'     => 'code'
         );
@@ -184,9 +184,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             // set default layout file (as of Latte 2.4)
             $latte->addProvider('coreParentFinder', function ($template) {
                 if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
-//                    $viewsDirWithSeparator = empty($this->viewsDir) ? '' : $this->viewsDir . '/';
-//                    return $this->config->paths->templates . $viewsDirWithSeparator . $this->defaultLayoutFile;
-                    $path = str_replace('//', '', $this->config->paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
+                    $path = str_replace('//', '/', $this->config->paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
                     return $path;
                 }
             });

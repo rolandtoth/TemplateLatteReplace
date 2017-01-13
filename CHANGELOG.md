@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.2.6 (2017-01-13)
+
+- autoload module on front-end only
+
+
+
 ### 0.2.5 (2017-01-10)
 
 - option to replace PHP templates with Latte files (needs manual renaming admin.php to admin.latte)
