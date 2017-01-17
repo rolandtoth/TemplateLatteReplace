@@ -1,13 +1,13 @@
 <?php namespace ProcessWire;
 
-wire($this->api_var)->_filters['activeClass'] = function ($currentPage, $className = 'active') {
-    $page = wire('page');
+$this->wire($this->api_var)->_filters['activeClass'] = function ($currentPage, $className = 'active') {
+    $page = $this->wire('page');
 
     return ($page == $currentPage || $page->parentsUntil(1)->has($currentPage)) ? $className : '';
 };
 
 
-wire($this->api_var)->_filters['bodyClass'] = function ($p) {
+$this->wire($this->api_var)->_filters['bodyClass'] = function ($p) {
 
     $id    = $p->id;
     $class = "";
@@ -22,8 +22,8 @@ wire($this->api_var)->_filters['bodyClass'] = function ($p) {
             $class[] = "parent-" . $p->parent->id;
         }
 
-        if (wire('user')->language) {
-            $class[] = "lang-" . wire('user')->language->name;
+        if ($this->wire('user')->language) {
+            $class[] = "lang-" . $this->wire('user')->language->name;
         }
 
         $class[] = "template-" . $p->template->name;
@@ -35,17 +35,17 @@ wire($this->api_var)->_filters['bodyClass'] = function ($p) {
 };
 
 
-wire($this->api_var)->_filters['getPage'] = function ($selector = null) {
+$this->wire($this->api_var)->_filters['getPage'] = function ($selector = null) {
 
     if (is_null($selector)) {
         return false;
     }
 
-    return wire('pages')->get($selector);
+    return $this->wire('pages')->get($selector);
 };
 
 
-wire($this->api_var)->_filters['getPages'] = function ($selector = null, $extraSelector = null) {
+$this->wire($this->api_var)->_filters['getPages'] = function ($selector = null, $extraSelector = null) {
 
     if (is_null($selector)) {
         return false;
@@ -55,11 +55,40 @@ wire($this->api_var)->_filters['getPages'] = function ($selector = null, $extraS
         $selector .= ',' . $extraSelector;
     }
 
-    return wire('pages')->find($selector);
+    return $this->wire('pages')->find($selector);
 };
 
+
+// get page field
+// use getParent if PageArray is passed
+$this->wire($this->api_var)->_filters['get'] = function ($selector = null, $field = 'title') {
+
+    if (is_null($selector)) {
+        return false;
+    }
+
+    // needed for $pageArray|getParent|get to work
+    if ($selector instanceOf Page) {
+        $selector = $selector->id;
+    }
+
+    return $this->wire('pages')->get($selector)->$field;
+};
+
+
+// get parent
+$this->wire($this->api_var)->_filters['getParent'] = function ($selector = null) {
+
+    if (is_null($selector)) {
+        return false;
+    }
+
+    return $this->wire('pages')->get($selector)->parent();
+};
+
+
 // remove everything but numbers
-wire($this->api_var)->_filters['onlyNumbers'] = function ($str) {
+$this->wire($this->api_var)->_filters['onlyNumbers'] = function ($str) {
     return preg_replace("/[^0-9]/", "", $str);
 };
 
@@ -73,7 +102,7 @@ wire($this->api_var)->_filters['onlyNumbers'] = function ($str) {
  *
  * @return mixed|string
  */
-wire($this->api_var)->_filters['niceUrl'] = function ($url = null, $remove = 'httpwww/') {
+$this->wire($this->api_var)->_filters['niceUrl'] = function ($url = null, $remove = 'httpwww/') {
 
     if (is_null($url)) {
         return false;

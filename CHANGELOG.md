@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.2.6 (2017-01-17)
+
+- added "getParent" and "get" filters
+
+
+
 ### 0.2.5 (2017-01-10)
 
 - option to replace PHP templates with Latte files (needs manual renaming admin.php to admin.latte)

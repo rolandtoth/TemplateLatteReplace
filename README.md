@@ -462,6 +462,7 @@ Note: use parenthesis to access the returned Page object's methods.
 <p>
     {(1|getPage)->getLanguageValue('de', 'title')}
 </p>
+```
 
 
 **getPages**
@@ -477,6 +478,28 @@ This is a "filter" version of the macro "pages" (see above). The difference is t
 {* now get only 6 of them *}
 <p n:foreach="($servicePages|getPages:'limit=6') as $p">
     {$p->title|noescape}
+</p>
+```
+
+
+**getParent**
+
+Simply returns the given PageArray's parent page, eg. when using with getPages filter.
+
+```php
+<p>
+    {('template=portfolio-items'|getPages|getParent)->title}
+</p>
+```
+
+
+**get**
+
+Provides an easy way to get a field value of a page. Defaults to the "title" field. Using this filter eliminates the need of the extra parenthesis.
+
+```php
+<p>
+    {1|get:httpUrl}
 </p>
 ```
 
