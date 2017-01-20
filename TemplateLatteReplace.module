@@ -23,6 +23,12 @@ use Latte\Macros\MacroSet;
  */
 class TemplateLatteReplace extends WireData implements Module, ConfigurableModule {
 
+
+	public $cacheDir;
+    public $viewsDir;
+    public $defaultLayoutFile;
+    public $api_var;
+    
     /**
      * Basic information about module
      */
@@ -32,19 +38,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 26,
+            'version'  => 27,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
             'icon'     => 'code'
         );
     }
-
-    protected $latte;
-    public $cacheDir;
-    public $viewsDir;
-    public $defaultLayoutFile;
-    public $api_var;
 
     /**
      * Default configuration for module
@@ -59,8 +59,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             "defaultLayoutFile" => '@layout.latte',
             "options"           => array(
                 'extraMacros',
-            	'useLatteExtension',
                 'extraFilters'
+            	//'useLatteExtension',
             ),
             "fuels"             => array(
                 'config',
@@ -106,26 +106,24 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     /**
      * Initialize the module and setup hooks
+     *
      */
-
     public function ready() {
+
+	    if ($this->wire('page')->template == 'admin') {
+            return;
+        }
 
         /**
          * Set new global api variable.
          * Always added to avoid php error.
          */
         require_once __DIR__ . '/LatteView.php';
-
         $this->wire($this->api_var, new LatteView());
-
-        if ($this->wire('page')->template == 'admin') {
-            return;
-        }
 
         $defaultData = self::getDefaultData();
 
         // add common PW variables to view files
-//        foreach ($this->fuels as $fuel) {
         foreach ($defaultData['fuels'] as $fuel) {
             $this->wire($this->api_var)->$fuel = $this->wire($fuel);
         }
@@ -148,8 +146,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     public function hookRender(HookEvent $event) {
 
-        $api_var = $this->wire($this->api_var);
-
         $templateFile = $event->object;
 
         if ($templateFile->page->template == 'admin') {
@@ -163,7 +159,9 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         if ($templateFile->filename != "") {
             // this is a page render, go ahead and process the output
-            $event->return = $this->renderLatteString($templateFile->filename, $api_var);
+            $markup = $this->renderLatteString($templateFile->filename);
+            //$this->wire('modules')->TextformatterAutoSchema->formatValue(new Page(), new Field(), $markup);
+            $event->return = $markup;
         }
     }
 
@@ -174,25 +172,43 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public function getLatte() {
 
-        if (!isset($this->latte)) {
+	        $view = $this->wire($this->api_var);
+	        $paths = $this->wire('config')->paths;
 
             require_once __DIR__ . '/latte/latte.php';
 
             $latte = new Engine;
-            $latte->setTempDirectory($this->wire('config')->paths->cache . $this->cacheDir);
+            $latte->setTempDirectory($paths->cache . $this->cacheDir);
 
             // set default layout file (as of Latte 2.4)
-            $latte->addProvider('coreParentFinder', function ($template) {
+            $latte->addProvider('coreParentFinder', function ($template) use ($paths) {
                 if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
-                    $path = str_replace('//', '/', $this->config->paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
+                    $path = $this->removeDoubleSlashes($paths->templates . $this->viewsDir . '/' . $this->defaultLayoutFile);
                     return $path;
                 }
             });
 
-            $this->latte = $latte;
-        }
+                    // add filters
+	        if (!empty($view->_filters)) {
+	            foreach ($view->_filters as $key => $value) {
+	                $latte->addFilter($key, $value);
+	            }
+	        }
 
-        return $this->latte;
+	        // this makes _'string' work in .latte files
+	        $latte->addFilter('translate', function () {
+	            return _t(func_get_args());
+	        });
+
+	        // add macros
+	        if (!empty($view->_addMacro)) {
+	            $set = new MacroSet($latte->getCompiler());
+	            foreach ($view->_addMacro as $key => $value) {
+	                $set->addMacro($value[0], $value[1], $value[2]);
+	            }
+	        }
+	        
+        return $latte;
     }
 
     /**
@@ -200,36 +216,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * @param $view
      *
      * @return string
-     * @throws \Exception
-     * @throws \Throwable
      */
-    public function renderLatteString($templateFilename, $view) {
+    public function renderLatteString($templateFilename) {
 
-        $this->getLatte();
+		$latte = $this->getLatte();
+        $view = $this->wire($this->api_var);
 
-        // add filters
-        if (!empty($view->_filters)) {
-            foreach ($view->_filters as $key => $value) {
-                $this->latte->addFilter($key, $value);
-            }
-        }
-
-        // this makes _'string' work in .latte files
-        $this->latte->addFilter('translate', function () {
-            return _t(func_get_args());
-        });
-
-        // add macros
-        if (!empty($view->_addMacro)) {
-            $set = new MacroSet($this->latte->getCompiler());
-            foreach ($view->_addMacro as $key => $value) {
-                $set->addMacro($value[0], $value[1], $value[2]);
-            }
-        }
-
-        $filename = basename(basename($templateFilename), ".php");
-        $viewFile = isset($view->viewFile) ? $view->viewFile : $filename;
-
+        $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFilename), ".php");
 
         // enable template file with/without extension
         $viewFile = str_replace('.latte', '', $viewFile);
@@ -243,13 +236,21 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
         }
 
-        $markup = $this->latte->renderToString($viewRootDir . $viewFile . '.latte', (array) $view);
+        $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
 
-        if (isset($view->json_encode) && boolval($view->json_encode)) {
+        $markup = $latte->renderToString($viewRootDir . $viewFile . '.latte', (array) $view);
+
+        //if (isset($view->json_encode) && boolval($view->json_encode)) {
+        if (isset($view->json_encode) && !!($view->json_encode)) {
             $markup = json_encode($markup, $view->json_encode);
         }
 
         return $markup;
+    }
+
+
+    public function removeDoubleSlashes($str) {
+        return str_replace('//', '/', $str);
     }
 
     /**

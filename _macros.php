@@ -4,7 +4,7 @@ wire($this->api_var)->_addMacro = array(
 
     'iff' => array(
         'iff',
-        'if (isset(%node.word) && %node.word) { $x = %node.word; ',
+        'if (null !== %node.word && %node.word) { $x = %node.word; ',
         '}'
     ),
 

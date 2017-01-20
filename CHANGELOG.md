@@ -1,6 +1,13 @@
 #Changelog
 
 
+### 0.2.7 (2017-01-20)
+
+- added "breadcrumb" and "count" filters
+- "get" filter returns the first image in case of Pageimages
+
+
+
 ### 0.2.6 (2017-01-17)
 
 - added "getParent" and "get" filters
