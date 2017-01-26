@@ -1,6 +1,13 @@
 #Changelog
 
 
+### 0.2.8 (2017-01-26)
+
+- added "defaultTextdomain" setting to module config
+- update Latte to 2.4.3
+
+
+
 ### 0.2.7 (2017-01-20)
 
 - added "breadcrumb" and "count" filters

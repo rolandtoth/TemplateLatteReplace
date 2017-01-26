@@ -15,11 +15,10 @@ function _t($args = null) {
 
     $text = isset($args[0]) ? $args[0] : "";
 
-    if ($text == "") {
+    if ($text == "")
         return "";
-    }
 
-    $textdomain = isset($args[2]) ? $args[2] : "/site/templates/_strings.php";
+    $textdomain = isset($args[2]) ? $args[2] : ProcessWire\wire('config')->defaultTextdomain;
 
     $string = isset($args[1]) ? ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
 

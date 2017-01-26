@@ -576,6 +576,8 @@ ProcessWire's Language Translator cannot parse strings from Latte files so a wor
 
 The module uses "/site/templates/_strings.php" file as a default textdomain where you need to list all the strings you use in view files.
 
+Note: as of v0.2.8 the default textdomain can be set in module settings page or manually using "wire('config')->defaultTextdomain = '/site/templates/_translations.php'".
+
 Create a "_strings.php" file in "/site/templates/" directory, then add your strings to it.
 
 For strings without context, use "__()", and use "_x() if you need to set a context:
