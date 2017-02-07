@@ -310,16 +310,16 @@ $view->contactPage = $pages->get(1044);
 
 ### Filters
 
-You can make your own filters by adding new items to the "$view->_filters" array. From v2.4 there are some additional filters available too (see below).
+You can make your own filters by using "$view->addFilters($name, $callback)". From v2.4 there are some additional filters available too (see below).
 
 *Example: add "activeClass" filter:*
 
 ```php
-$view->_filters['activeClass'] = function ($currentPage) {
+$view->addFilter('activeClass', function ($currentPage) {
     $page = wire('page');
 
     return ($page == $currentPage || $page->parentsUntil(1)->has($currentPage)) ? 'active' : '';
-};
+});
 ```
 
 *Usage in view file:*
@@ -341,6 +341,32 @@ This will truncate the title at 20 characters ("truncate" is a default filter, [
 **Where to place filters?**
 
 The best place for filters is "/site/ready.php", or another file that ProcessWire always loads.
+
+**How to call filters in PHP files?**
+
+Both built-in and custom macros can be used in PHP files too with $view->invokeFilter($name, $parametersArray).
+
+*Example: apply the built-in "truncate" filter on a string*
+
+```php
+$view->invokeFilter('truncate', array('Lorem ipsum dolorem sit', 5));
+// output: "Lore…"
+```
+
+Note: using a scalar value for the second parameter is OK if your filter doesn't need any parameter.
+
+*Example: apply the built-in "upper" filter on a string*
+
+```php
+$view->invokeFilter('upper', 'Lorem ipsum');
+// output: "LOREM IPSUM"
+```
+
+
+#### Custom macros
+
+You can also add your custom macros by using "$view->addMacro()". See the file "_macros.php" for details.
+
 
 
 ### Additional filters and macros (from v2.4)
@@ -537,6 +563,37 @@ Pass an array of options to fine-tune:
 </div>
 ```
 
+**renderPager**
+
+Returns a pagination markup (pager) when applied to a PageArray. Accepts one parameter: a number (numPageLinks) or an array to override the defaults.
+
+```php
+{$pArr|renderPager|noescape}
+{$pArr|renderPager:2|noescape}
+{$pArr|renderPager:array('nextItemLabel' => 'next')|noescape}
+{$pArr|renderPager:$customPaginationSettings|noescape}
+```
+
+In the examples above $customPaginationSettings is an array that you can set eg. in ready.php:
+
+```php
+$view->customPaginationSettings = array(
+    'numPageLinks'       => 3, // Default: 10
+    'getVars'            => null, // Default: empty array
+    'baseUrl'            => array(), // Default: empty
+    'listMarkup'         => "<ul class='pagination'>{out}</ul>",
+    'itemMarkup'         => "<li class='{class}'>{out}</li>",
+    'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
+    'nextItemLabel'      => 'next page',
+    'previousItemLabel'  => 'previous page',
+    'separatorItemLabel' => '',
+    'separatorItemClass' => '',
+    'nextItemClass'      => 'next',
+    'previousItemClass'  => 'previous',
+    'lastItemClass'      => 'last',
+    'currentItemClass'   => 'active'
+);
+```
 
 **niceUrl**
 

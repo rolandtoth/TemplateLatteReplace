@@ -1,6 +1,18 @@
 #Changelog
 
 
+### 0.2.9 (2017-01-31)
+
+- change in adding custom macros and filters: $view->addMacro(), $view->addFilter()
+- added $view->invokeFilter($name, $args) method to run filters directly in PHP
+- updated filters to accept PageArrays instead selectors only
+- new filter: 'renderpager'
+- new filter: 'getsetting' (to use with TextformatterMultivalue module)
+- $view->latte returns the Latte object
+- lowercase filter names
+
+
+
 ### 0.2.8 (2017-01-26)
 
 - added "defaultTextdomain" setting to module config

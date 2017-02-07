@@ -1,13 +1,14 @@
 <?php namespace ProcessWire;
 
-$this->wire($this->api_var)->_filters['activeClass'] = function ($currentPage, $className = 'active') {
+
+$view->addFilter('activeclass', function ($currentPage, $className = 'active') {
     $page = $this->wire('page');
 
     return ($page == $currentPage || $page->parentsUntil(1)->has($currentPage)) ? $className : '';
-};
+});
 
 
-$this->wire($this->api_var)->_filters['bodyClass'] = function ($p) {
+$view->addFilter('bodyclass', function ($p) {
 
     $id    = $p->id;
     $class = "";
@@ -25,41 +26,83 @@ $this->wire($this->api_var)->_filters['bodyClass'] = function ($p) {
         if ($this->wire('user')->language)
             $class[] = "lang-" . $this->wire('user')->language->name;
 
-
         $class[] = "template-" . $p->template->name;
 
         $class = implode(" ", $class);
     }
 
     return $class;
-};
+});
+
+// returns a selector built from IDs (eg. "id=1045|1033|1020")
+$view->addFilter('getselector', function ($pArr = null) {
+
+    if (is_null($pArr) || !($pArr instanceof PageArray))
+        return false;
+
+    return 'id=' . $pArr->id('|');
+});
 
 
-$this->wire($this->api_var)->_filters['getPage'] = function ($selector = null) {
+$view->addFilter('getpage', function ($selector = null) {
 
     if (is_null($selector))
         return false;
-
 
     return $this->wire('pages')->get($selector);
-};
+});
 
 
-$this->wire($this->api_var)->_filters['getPages'] = function ($selector = null, $extraSelector = null) {
+$view->addFilter('getpages', function ($selector = null, $extraSelector = null) {
 
     if (is_null($selector))
         return false;
 
+    if ($selector instanceof PageArray)
+        return $selector->filter($extraSelector);
 
     if (!is_null($extraSelector))
         $selector .= ',' . $extraSelector;
 
-
     return $this->wire('pages')->find($selector);
-};
+});
 
 
-$this->wire($this->api_var)->_filters['breadcrumb'] = function ($p = null, $args = null) {
+$view->addFilter('renderpager', function ($pArr = null, $options = null) {
+
+    if (is_null($pArr) || !($pArr instanceof PageArray))
+        return false;
+
+    $paginationSettings = array(
+        'numPageLinks'       => 10, // Default: 10
+        'getVars'            => null, // Default: empty array
+        'baseUrl'            => array(), // Default: empty
+        'listMarkup'         => "<ul class='pagination'>{out}</ul>",
+        'itemMarkup'         => "<li class='{class}'>{out}</li>",
+        'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
+        'nextItemLabel'      => '→',
+        'previousItemLabel'  => '←',
+        'separatorItemLabel' => '',
+        'separatorItemClass' => '',
+        'nextItemClass'      => 'next',
+        'previousItemClass'  => 'previous',
+        'lastItemClass'      => 'last',
+        'currentItemClass'   => 'active'
+    );
+
+    if (!is_null($options)) {
+        if (is_array($options)) {   // merge user options
+            $paginationSettings = array_merge($paginationSettings, $options);
+        } elseif (is_numeric($options)) {   // only a number is passed, set numPageLinks to it
+            $paginationSettings['numPageLinks'] = $options;
+        }
+    }
+
+    return $pArr->renderPager($paginationSettings);
+});
+
+
+$view->addFilter('breadcrumb', function ($p = null, $args = null) {
 
     if (is_null($p))
         return false;
@@ -116,12 +159,12 @@ $this->wire($this->api_var)->_filters['breadcrumb'] = function ($p = null, $args
     }
 
     return '<ul' . $id . $class . '>' . $markup . '</ul>';
-};
+});
 
 
 // get page field
 // use getParent if PageArray is passed
-$this->wire($this->api_var)->_filters['get'] = function ($selector = null, $field = 'title') {
+$view->addFilter('get', function ($selector = null, $field = 'title') {
 
     if (is_null($selector))
         return false;
@@ -142,36 +185,53 @@ $this->wire($this->api_var)->_filters['get'] = function ($selector = null, $fiel
         $value = $page->$field;
 
     return $value;
-};
+});
+
+
+
+//$view->addFilter('lazy', function ($img = null, $sizes) {
+//
+//    if (is_null($img) || !($img instanceof Pageimage))
+//        return false;
+//
+//    $width = $sizes[0];
+//    $height = $sizes[1];
+//
+//    $imgFull = $img->size($width, $height);
+//    $imgSmall = $img->size($width/4, $height/4);
+//
+//    return $imgSmall->url . '" data-src="' . $imgFull->url;
+//});
+
 
 // count PageArray
-$this->wire($this->api_var)->_filters['count'] = function ($selector = null) {
+$view->addFilter('count', function ($selector = null) {
 
     if (is_null($selector))
         return false;
 
-    return $this->wire('pages')->find($selector)->count();
-};
+    return ($selector instanceof PageArray) ? $selector->count() : $this->wire('pages')->find($selector)->count();
+});
 
 
 // get parent
-$this->wire($this->api_var)->_filters['getParent'] = function ($selector = null) {
+$view->addFilter('getparent', function ($selector = null) {
 
     if (is_null($selector))
         return false;
 
-    return $this->wire('pages')->get($selector)->parent();
-};
+    return ($selector instanceof PageArray) ? $selector->first()->parent() : $this->wire('pages')->get($selector)->parent();
+});
 
 
 // remove everything but numbers
-$this->wire($this->api_var)->_filters['onlyNumbers'] = function ($str) {
+$view->addFilter('onlynumbers', function ($str) {
     return preg_replace("/[^0-9]/", "", $str);
-};
+});
 
 
 /**
- * Remove http, www from links
+ * Remove http, www or ending / from links
  *
  * @param string $url
  *
@@ -179,7 +239,7 @@ $this->wire($this->api_var)->_filters['onlyNumbers'] = function ($str) {
  *
  * @return mixed|string
  */
-$this->wire($this->api_var)->_filters['niceUrl'] = function ($url = null, $remove = 'httpwww/') {
+$view->addFilter('niceurl', function ($url = null, $remove = 'httpwww/') {
 
     if (is_null($url))
         return false;
@@ -196,4 +256,58 @@ $this->wire($this->api_var)->_filters['niceUrl'] = function ($url = null, $remov
         $url = rtrim($url, '/');
 
     return $url;
-};
+});
+
+
+// helper filter for TextformatterMultiValue module
+$view->addFilter('getsetting', function ($args = null) use ($view) {
+
+    $isMultiLang  = is_object(wire('languages'));
+    $originalLang = 'default';
+    $user         = wire('user');
+
+    if ($isMultiLang) {
+        $originalLang = $user->language->name;
+    }
+
+    if (!is_array($args)) {
+        $args = func_get_args();
+    }
+
+    if (isset($args[0])) {
+        $key = $args[0];
+    } else {
+        return false;
+    }
+
+    $p         = (isset($args[1]) && !empty($args[1])) ? $args[1] : wire('pages')->get(1);
+    $language  = isset($args[2]) ? $args[2] : $originalLang;
+    $recursive = isset($args[3]) ? $args[3] : true;
+
+    // allow only page ID to be passed
+    if (is_numeric($p)) {
+        $p =  wire('pages')->get($p);
+    }
+
+    if ($isMultiLang) {
+        $user->language = $language;
+    }
+
+    $result = (isset($p->mv) && !empty($p->mv->$key->value)) ? $p->mv->$key->value : null;
+
+    // try default language if value not found
+    if ($isMultiLang && is_null($result) && $recursive) {
+        $result = $view->invokeFilter('getsetting', array($key, $p, 'default', false));
+    }
+
+    // return empty string if it's literally set to NULL
+    if (trim($result) === 'NULL') {
+        $result = '';
+    }
+
+    if ($isMultiLang) {
+        $user->language = $originalLang;
+    }
+
+    return $result;
+});
