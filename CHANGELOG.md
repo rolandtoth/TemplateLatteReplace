@@ -1,6 +1,14 @@
 #Changelog
 
 
+### 0.3.0 (2017-02-10)
+
+- added 'sanitize' filter (+ alias 'sanitizer')
+- added alias 'pager' to 'renderpager' filter
+- fix $modules fuel instead $module
+
+
+
 ### 0.2.9 (2017-01-31)
 
 - change in adding custom macros and filters: $view->addMacro(), $view->addFilter()

@@ -1,6 +1,9 @@
 <?php namespace ProcessWire;
 
 
+use Nette\Utils\Html;
+use Nette\Utils\SmartObject;
+
 $view->addFilter('activeclass', function ($currentPage, $className = 'active') {
     $page = $this->wire('page');
 
@@ -10,7 +13,7 @@ $view->addFilter('activeclass', function ($currentPage, $className = 'active') {
 
 $view->addFilter('bodyclass', function ($p) {
 
-    $id    = $p->id;
+    $id = $p->id;
     $class = "";
 
     if (!empty($id)) {
@@ -74,20 +77,20 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
         return false;
 
     $paginationSettings = array(
-        'numPageLinks'       => 10, // Default: 10
-        'getVars'            => null, // Default: empty array
-        'baseUrl'            => array(), // Default: empty
-        'listMarkup'         => "<ul class='pagination'>{out}</ul>",
-        'itemMarkup'         => "<li class='{class}'>{out}</li>",
-        'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
+        'numPageLinks' => 10, // Default: 10
+        'getVars' => null, // Default: empty array
+        'baseUrl' => array(), // Default: empty
+        'listMarkup' => "<ul class='pagination'>{out}</ul>",
+        'itemMarkup' => "<li class='{class}'>{out}</li>",
+        'linkMarkup' => "<a href='{url}'><span>{out}</span></a>",
         'nextItemLabel'      => '→',
         'previousItemLabel'  => '←',
         'separatorItemLabel' => '',
         'separatorItemClass' => '',
-        'nextItemClass'      => 'next',
-        'previousItemClass'  => 'previous',
-        'lastItemClass'      => 'last',
-        'currentItemClass'   => 'active'
+        'nextItemClass' => 'next',
+        'previousItemClass' => 'previous',
+        'lastItemClass' => 'last',
+        'currentItemClass' => 'active'
     );
 
     if (!is_null($options)) {
@@ -102,6 +105,12 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
 });
 
 
+// alias to "renderpager"
+$view->addFilter('pager', function () use ($view) {
+    return $view->invokeFilter('renderpager', func_get_args());
+});
+
+
 $view->addFilter('breadcrumb', function ($p = null, $args = null) {
 
     if (is_null($p))
@@ -112,13 +121,13 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
 
     $markup = '';
 
-    $root           = isset($args['root']) ? $args['root'] : 1;
-    $addHome        = isset($args['addHome']) ? $args['addHome'] : true;
-    $addCurrent     = isset($args['addCurrent']) ? $args['addCurrent'] : false;
+    $root = isset($args['root']) ? $args['root'] : 1;
+    $addHome = isset($args['addHome']) ? $args['addHome'] : true;
+    $addCurrent = isset($args['addCurrent']) ? $args['addCurrent'] : false;
     $addCurrentLink = isset($args['addCurrentLink']) ? $args['addCurrentLink'] : false;
-    $class          = isset($args['class']) ? $args['class'] : 'breadcrumb';
-    $id             = isset($args['id']) ? $args['id'] : '';
-    $addAttributes  = isset($args['addAttributes']) ? true : false;
+    $class = isset($args['class']) ? $args['class'] : 'breadcrumb';
+    $id = isset($args['id']) ? $args['id'] : '';
+    $addAttributes = isset($args['addAttributes']) ? true : false;
 
     if (strlen($id))
         $id = ' id="' . $id . '"';
@@ -186,7 +195,6 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
 
     return $value;
 });
-
 
 
 //$view->addFilter('lazy', function ($img = null, $sizes) {
@@ -262,9 +270,9 @@ $view->addFilter('niceurl', function ($url = null, $remove = 'httpwww/') {
 // helper filter for TextformatterMultiValue module
 $view->addFilter('getsetting', function ($args = null) use ($view) {
 
-    $isMultiLang  = is_object(wire('languages'));
+    $isMultiLang = is_object(wire('languages'));
     $originalLang = 'default';
-    $user         = wire('user');
+    $user = wire('user');
 
     if ($isMultiLang) {
         $originalLang = $user->language->name;
@@ -274,19 +282,21 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
         $args = func_get_args();
     }
 
-    if (isset($args[0])) {
-        $key = $args[0];
+
+    if (isset($args[1])) {
+        $key = $args[1];
     } else {
         return false;
     }
 
-    $p         = (isset($args[1]) && !empty($args[1])) ? $args[1] : wire('pages')->get(1);
-    $language  = isset($args[2]) ? $args[2] : $originalLang;
+    $p = (isset($args[0]) && !empty($args[0])) ? $args[0] : wire('pages')->get(1);
+    $language = isset($args[2]) ? $args[2] : $originalLang;
     $recursive = isset($args[3]) ? $args[3] : true;
+
 
     // allow only page ID to be passed
     if (is_numeric($p)) {
-        $p =  wire('pages')->get($p);
+        $p = wire('pages')->get($p);
     }
 
     if ($isMultiLang) {
@@ -310,4 +320,38 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     }
 
     return $result;
+});
+
+/**
+ * Return sanitized value using ProcessWire's sanitizer
+ *
+ * {('Lorem ipsum')|sanitize:'fieldName'}
+ * {$p->body|sanitize:'text', array('multiLine' => true, 'stripTags' => false)}
+ * {('2017/02/28')|sanitize:'date', 'YYY F j.', array('returnFormat' => 'Y. F j.')}
+ */
+
+$view->addFilter('sanitize', function ($value = null, $fx = null, $options = null) {
+
+    if (is_null($value)|| is_null($fx))
+        return false;
+
+    if (is_null($options)) {
+        $out = wire('sanitizer')->$fx($value);
+
+    } else {
+
+        $args = func_get_args();
+
+        unset($args[1]); // remove $fx
+        $args = ($args); // reindex
+
+        $out = call_user_func_array(array(wire('sanitizer'), $fx), $args);
+    }
+
+    return $out;
+});
+
+// alias to "sanitize"
+$view->addFilter('sanitizer', function () use ($view) {
+    return $view->invokeFilter('sanitize', func_get_args());
 });

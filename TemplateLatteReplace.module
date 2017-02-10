@@ -21,7 +21,8 @@ use Latte\Macros\MacroSet;
  *
  * @package ProcessWire
  */
-class TemplateLatteReplace extends WireData implements Module, ConfigurableModule {
+class TemplateLatteReplace extends WireData implements Module, ConfigurableModule
+{
 
     public $cacheDir;
     public $viewsDir;
@@ -31,17 +32,18 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     /**
      * Basic information about module
      */
-    public static function getModuleInfo() {
+    public static function getModuleInfo()
+    {
         return array(
-            'title'    => 'Template Latte Replace',
-            'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
-            'href'     => '',
-            'author'   => 'Roland Toth',
-            'version'  => 29,
+            'title' => 'Template Latte Replace',
+            'summary' => __('Latte template engine support for ProcessWire.', __FILE__),
+            'href' => '',
+            'author' => 'Roland Toth',
+            'version' => 30,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
-            'icon'     => 'code'
+            'icon' => 'code'
         );
     }
 
@@ -49,26 +51,27 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Default configuration for module
      *
      */
-    static public function getDefaultData() {
+    static public function getDefaultData()
+    {
 
         return array(
-            "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
-            "api_var"           => 'view',
-            "viewsDir"          => '',
+            "cacheDir" => str_replace('ProcessWire\\', '', __CLASS__),
+            "api_var" => 'view',
+            "viewsDir" => '',
             "defaultTextdomain" => '/site/templates/_strings.php',
             "defaultLayoutFile" => '@layout.latte',
-            "options"           => array(
+            "options" => array(
                 'extraMacros',
                 'extraFilters'
                 //'useLatteExtension',
             ),
-            "fuels"             => array(
+            "fuels" => array(
                 'config',
                 'fields',
                 'input',
                 'languages',
                 'log',
-                'module',
+                'modules',
                 'page',
                 'pages',
                 'sanitizer',
@@ -83,13 +86,15 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Populate the default config data
      *
      */
-    public function __construct() {
+    public function __construct()
+    {
         foreach (self::getDefaultData() as $key => $value) {
             $this->$key = $value;
         }
     }
 
-    public function ___uninstall() {
+    public function ___uninstall()
+    {
         // remove cache dir
         $cacheDir = wire('config')->paths->cache . $this->cacheDir;
 
@@ -98,7 +103,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
     }
 
-    public function init() {
+    public function init()
+    {
         if (in_array('useLatteExtension', $this->options)) {
             $this->wire('config')->templateExtension = 'latte';
         }
@@ -108,7 +114,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Initialize the module and setup hooks
      *
      */
-    public function ready() {
+    public function ready()
+    {
 
         if ($this->wire('page')->template == 'admin') {
             return;
@@ -150,7 +157,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
 
-    public function hookRender(HookEvent $event) {
+    public function hookRender(HookEvent $event)
+    {
 
         $templateFile = $event->object;
 
@@ -179,8 +187,16 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 //            }
         }
 
-//            $event->return = $markup;
-        $event->return = $markup;
+            $event->return = $markup;
+
+        // fix html entity encoder issues
+//        $event->return = htmlspecialchars_decode($markup);
+
+        // no need to ue "noescape" filter
+//        $event->return = html_entity_decode($markup);
+
+        // fix html entity encoder + no need to ue "noescape" filter
+//        $event->return = htmlspecialchars_decode(html_entity_decode($markup));
     }
 
     /**
@@ -188,12 +204,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      *
      * @return Engine
      */
-    public function getLatte() {
+    public function getLatte()
+    {
 
         if (is_object($this->latte))
             return $this->latte;
 
-        $view  = $this->wire($this->api_var);
+        $view = $this->wire($this->api_var);
         $paths = $this->wire('config')->paths;
 
         require_once __DIR__ . '/latte/latte.php';
@@ -225,14 +242,14 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     /**
      * @param $templateFilename
-     * @param $view
      *
      * @return string
      */
-    public function renderLatteString($templateFilename) {
+    public function renderLatteString($templateFilename)
+    {
 
         $latte = $this->getLatte();
-        $view  = $this->wire($this->api_var);
+        $view = $this->wire($this->api_var);
 
         $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFilename), ".php");
 
@@ -250,9 +267,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
 
-        $markup = $latte->renderToString($viewRootDir . $viewFile . '.latte', (array) $view);
+        $markup = $latte->renderToString($viewRootDir . $viewFile . '.latte', (array)$view);
 
-        //if (isset($view->json_encode) && boolval($view->json_encode)) {
         if (isset($view->json_encode) && !!($view->json_encode)) {
             $markup = json_encode($markup, $view->json_encode);
         }
@@ -261,7 +277,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
 
-    public function removeDoubleSlashes($str) {
+    public function removeDoubleSlashes($str)
+    {
         return str_replace('//', '/', $str);
     }
 
@@ -273,10 +290,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * @return InputfieldWrapper
      *
      */
-    public static function getModuleConfigInputfields(array $data) {
+    public static function getModuleConfigInputfields(array $data)
+    {
 
         $defaultData = self::getDefaultData();
-        $data        = array_merge($defaultData, $data);
+        $data = array_merge($defaultData, $data);
 
         // clear cache
         if (wire('input')->post->submit_save_module) {
@@ -297,72 +315,72 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $wrapper = new InputfieldWrapper();
 
         $fieldName = 'api_var';
-        $f         = wire('modules')->get("InputfieldText");
+        $f = wire('modules')->get("InputfieldText");
         $f->attr('name', $fieldName);
-        $f->label       = __('API variable', __FILE__);
+        $f->label = __('API variable', __FILE__);
         $f->description = __('Name of the variable that is passed to the view files.', __FILE__);
-        $f->notes       = __('Example: `view` (use as $view->myVar = ... in template files.)', __FILE__);
+        $f->notes = __('Example: `view` (use as $view->myVar = ... in template files.)', __FILE__);
         $f->columnWidth = 34;
-        $f->collapsed   = Inputfield::collapsedNever;
-        $f->value       = !empty($data[ $fieldName ]) ? wire('sanitizer')->varName(trim($data[ $fieldName ]), '/\\') : $defaultData[ $fieldName ];
+        $f->collapsed = Inputfield::collapsedNever;
+        $f->value = !empty($data[$fieldName]) ? wire('sanitizer')->varName(trim($data[$fieldName]), '/\\') : $defaultData[$fieldName];
         $wrapper->add($f);
 
         $fieldName = 'viewsDir';
-        $f         = wire('modules')->get("InputfieldText");
+        $f = wire('modules')->get("InputfieldText");
         $f->attr('name', $fieldName);
-        $f->label       = __('Default directory for views', __FILE__);
+        $f->label = __('Default directory for views', __FILE__);
         $f->description = __('Directory name for .latte" files (relative to site/templates).', __FILE__);
-        $f->notes       = __('Example: `views`', __FILE__);
-        $f->collapsed   = 2;
+        $f->notes = __('Example: `views`', __FILE__);
+        $f->collapsed = 2;
         $f->columnWidth = 33;
-        $f->collapsed   = Inputfield::collapsedNever;
-        $f->value       = !empty($data[ $fieldName ]) ? trim($data[ $fieldName ], '/\\') : $defaultData[ $fieldName ];
+        $f->collapsed = Inputfield::collapsedNever;
+        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
         $wrapper->add($f);
 
         $fieldName = 'defaultLayoutFile';
-        $f         = wire('modules')->get("InputfieldText");
+        $f = wire('modules')->get("InputfieldText");
         $f->attr('name', $fieldName);
-        $f->label       = __('Default layout file', __FILE__);
+        $f->label = __('Default layout file', __FILE__);
         $f->description = __('The base layout file that all views will use.', __FILE__);
-        $f->notes       = __('Example: `@layout.latte` or `layouts/@default.latte`', __FILE__);
-        $f->collapsed   = 2;
+        $f->notes = __('Example: `@layout.latte` or `layouts/@default.latte`', __FILE__);
+        $f->collapsed = 2;
         $f->columnWidth = 33;
-        $f->collapsed   = Inputfield::collapsedNever;
-        $f->value       = !empty($data[ $fieldName ]) ? trim($data[ $fieldName ], '/\\') : $defaultData[ $fieldName ];
+        $f->collapsed = Inputfield::collapsedNever;
+        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
         $wrapper->add($f);
 
         $fieldName = 'defaultTextdomain';
-        $f         = wire('modules')->get("InputfieldText");
+        $f = wire('modules')->get("InputfieldText");
         $f->attr('name', $fieldName);
-        $f->label       = __('Default textdomain', __FILE__);
+        $f->label = __('Default textdomain', __FILE__);
         $f->description = __('The default textdomain file used for translations.', __FILE__);
-        $f->notes       = __('Default: `/site/templates/_strings.php`', __FILE__);
-        $f->collapsed   = 2;
+        $f->notes = __('Default: `/site/templates/_strings.php`', __FILE__);
+        $f->collapsed = 2;
 //        $f->columnWidth = 33;
         $f->collapsed = Inputfield::collapsedNever;
-        $f->value     = !empty($data[ $fieldName ]) ? trim($data[ $fieldName ], '/\\') : $defaultData[ $fieldName ];
+        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
         $wrapper->add($f);
 
-        $fieldName    = 'options';
-        $f            = wire('modules')->get('InputfieldCheckboxes');
-        $f->name      = $fieldName;
-        $f->label     = __('Options', __FILE__);
+        $fieldName = 'options';
+        $f = wire('modules')->get('InputfieldCheckboxes');
+        $f->name = $fieldName;
+        $f->label = __('Options', __FILE__);
         $f->collapsed = Inputfield::collapsedNever;
 
         $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
         $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
         $f->addOption('useLatteExtension', __('Use `latte` extension - WARNING: rename "admin.php" to "admin.latte" manually!', __FILE__));
 
-        if (isset($data[ $fieldName ])) {
-            $f->attr('value', $data[ $fieldName ]);
+        if (isset($data[$fieldName])) {
+            $f->attr('value', $data[$fieldName]);
         }
         $wrapper->add($f);
 
         $f = wire('modules')->get("InputfieldCheckbox");
         $f->attr('name', 'clearCache');
-        $f->label       = __('Clear cache', __FILE__);
+        $f->label = __('Clear cache', __FILE__);
         $f->description = __('If checked, Latte cache will be cleared on saving the module.', __FILE__);
-        $f->collapsed   = Inputfield::collapsedNever;
+        $f->collapsed = Inputfield::collapsedNever;
         $f->columnWidth = 34;
         $wrapper->add($f);
 

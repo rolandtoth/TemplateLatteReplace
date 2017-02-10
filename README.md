@@ -312,10 +312,10 @@ $view->contactPage = $pages->get(1044);
 
 You can make your own filters by using "$view->addFilters($name, $callback)". From v2.4 there are some additional filters available too (see below).
 
-*Example: add "activeClass" filter:*
+*Example: add "activeclass" filter:*
 
 ```php
-$view->addFilter('activeClass', function ($currentPage) {
+$view->addFilter('activeclass', function ($currentPage) {
     $page = wire('page');
 
     return ($page == $currentPage || $page->parentsUntil(1)->has($currentPage)) ? 'active' : '';
@@ -325,10 +325,10 @@ $view->addFilter('activeClass', function ($currentPage) {
 *Usage in view file:*
 
 ```php
-<body class="{$page|activeClass}">
+<body class="{$page|activeclass}">
 ```
 
-Every filter gets the preceding variable as the first parameter. In this case, the parameter "$currentPage" is "$page", because the filter was called on "$page" ("$page|activeClass").
+Every filter gets the preceding variable as the first parameter. In this case, the parameter "$currentPage" is "$page", because the filter was called on "$page" ("$page|activeclass").
 
 To specify parameters use the ":" character:
 
@@ -446,20 +446,20 @@ This is an alternative to the built-in "var" macro and allows setting a variable
 
 The module comes with a few additional helper filters. If you don't need them you can disable in the module's settings page.
 
-**activeClass**
+**activeclass**
 
 Adds an 'active' class if the Page passed is the current page, or it is a children of the parent page (multi-level). Useful for navigation items or sliders for example. You can change the default className to another one by passing it as a parameter (added using  ":'current'" in the following snippet). Note that you need to take care of the spaces if you use another classes on the element.
 
 ```php
 <ul n:inner-foreach="$menuItems as $p">
-    <li class="menu-item {$p|activeClass:'current'}">
+    <li class="menu-item {$p|activeclass:'current'}">
         <a href="{$p->url)}">{$p->title|noescape}</a>
     </li>
 </ul>
 ```
 
 
-**bodyClass**
+**bodyclass**
 
 Adds some classes to the element (preferably to the "body") reflecting the page ID, template and user language (if applicable):
 
@@ -468,11 +468,11 @@ Adds some classes to the element (preferably to the "body") reflecting the page 
 - language: "lang-default"
 
 ```php
-<body class="{$page|bodyClass}">
+<body class="{$page|bodyclass}">
 ```
 
 
-**getPage**
+**getpage**
 
 This is a "filter" version of the macro "page" (see above) that makes really easy to reference a page by ID or selector.
 
@@ -480,41 +480,41 @@ Note: use parenthesis to access the returned Page object's methods.
 
 ```php
 <p>
-    {(1|getPage)->title}
+    {(1|getpage)->title}
 </p>
 ```
 
 ```php
 <p>
-    {(1|getPage)->getLanguageValue('de', 'title')}
+    {(1|getpage)->getLanguageValue('de', 'title')}
 </p>
 ```
 
 
-**getPages**
+**getpages**
 
 This is a "filter" version of the macro "pages" (see above). The difference is that you can pass an extra selector too.
 
 ```php
-<p n:foreach="('parent=1088'|getPages) as $p">
+<p n:foreach="('parent=1088'|getpages) as $p">
     {$p->title|noescape}
 </p>
 
 {* $view->servicesPages is set in ready.php and contains "template=service,sort=-created" *}
 {* now get only 6 of them *}
-<p n:foreach="($servicePages|getPages:'limit=6') as $p">
+<p n:foreach="($servicePages|getpages:'limit=6') as $p">
     {$p->title|noescape}
 </p>
 ```
 
 
-**getParent**
+**getparent**
 
-Simply returns the given PageArray's parent page, eg. when using with getPages filter.
+Simply returns the given PageArray's parent page, eg. when using with getpages filter.
 
 ```php
 <p>
-    {('template=portfolio-items'|getPages|getParent)->title}
+    {('template=portfolio-items'|getpages|getparent)->title}
 </p>
 ```
 
@@ -563,15 +563,15 @@ Pass an array of options to fine-tune:
 </div>
 ```
 
-**renderPager**
+**renderpager**
 
-Returns a pagination markup (pager) when applied to a PageArray. Accepts one parameter: a number (numPageLinks) or an array to override the defaults.
+Returns a pagination markup (pager) when applied to a PageArray. Accepts one parameter: a number (numPageLinks) or an array to override the defaults. The alias "pager" can also be used.
 
 ```php
-{$pArr|renderPager|noescape}
-{$pArr|renderPager:2|noescape}
-{$pArr|renderPager:array('nextItemLabel' => 'next')|noescape}
-{$pArr|renderPager:$customPaginationSettings|noescape}
+{$pArr|renderpager|noescape}
+{$pArr|renderpager:2|noescape}
+{$pArr|renderpager:array('nextItemLabel' => 'next')|noescape}
+{$pArr|renderpager:$customPaginationSettings|noescape}
 ```
 
 In the examples above $customPaginationSettings is an array that you can set eg. in ready.php:
@@ -595,31 +595,45 @@ $view->customPaginationSettings = array(
 );
 ```
 
-**niceUrl**
+**niceurl**
 
 Removes "http(s)" and/or "www" from a link, useful for outputting shorter links.
 
 ```php
 {* remove www and http *}
-<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl}</a>
+<a href="{$page->httpUrl}">{$page->httpUrl|niceurl}</a>
 {* remove "http" only *}
-<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'http'}</a>
+<a href="{$page->httpUrl}">{$page->httpUrl|niceurl:'http'}</a>
 {* remove "www" only *}
-<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'www'}</a>
+<a href="{$page->httpUrl}">{$page->httpUrl|niceurl:'www'}</a>
 {* remove trailing "/" *}
-<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'/'}</a>
+<a href="{$page->httpUrl}">{$page->httpUrl|niceurl:'/'}</a>
 {* remove "www" and trailing "/" *}
-<a href="{$page->httpUrl}">{$page->httpUrl|niceUrl:'www/'}</a>
+<a href="{$page->httpUrl}">{$page->httpUrl|niceurl:'www/'}</a>
 ```
 
 
-**onlyNumbers**
+**sanitize**
+
+Applies ProcessWire's sanitizer. The alias "sanitizer" can also be used.
+
+Examples:
+
+```php
+{('Lorem ipsum')|sanitize:'fieldName'}
+{$p->body|sanitize:'text', ['multiLine' => false]}
+{$p->body|sanitize:'text', array('multiLine' => true, 'stripTags' => false)}
+{('2017/02/28')|sanitizer:'date', 'YYY F j.', array('returnFormat' => 'Y. F j.')}
+```
+
+
+**onlynumbers**
 
 Removes everything other than numbers. You could also use the built-in "replaceRE" filter.
 
 ```php
 <p>
-    {$page->phone|onlyNumbers}
+    {$page->phone|onlynumbers}
 </p>
 ```
 
