@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.1 (2017-02-15)
+
+- added 'default' filter
+
+
+
 ### 0.3.0 (2017-02-10)
 
 - added 'sanitize' filter (+ alias 'sanitizer')

@@ -1,8 +1,14 @@
 <?php namespace ProcessWire;
 
+$view = $this->wire($this->api_var);
 
-use Nette\Utils\Html;
-use Nette\Utils\SmartObject;
+
+// return a default value if empty or falsy value passed
+// {$page->product_description|default:'No description is available for this product.'}
+$view->addFilter('default', function ($str = '', $default = '') {
+    return strlen($str) > 0 ? $str : $default;
+});
+
 
 $view->addFilter('activeclass', function ($currentPage, $className = 'active') {
     $page = $this->wire('page');
@@ -11,6 +17,7 @@ $view->addFilter('activeclass', function ($currentPage, $className = 'active') {
 });
 
 
+// add various classes to <body>, eg id, template, language, home
 $view->addFilter('bodyclass', function ($p) {
 
     $id = $p->id;
@@ -36,6 +43,7 @@ $view->addFilter('bodyclass', function ($p) {
 
     return $class;
 });
+
 
 // returns a selector built from IDs (eg. "id=1045|1033|1020")
 $view->addFilter('getselector', function ($pArr = null) {
@@ -232,6 +240,16 @@ $view->addFilter('getparent', function ($selector = null) {
 });
 
 
+// inline background-image
+$view->addFilter('bgimage', function ($img = null) {
+
+    if (is_null($img))
+        return false;
+
+    return 'style="background-image: url(\'' . $img->url . '\')"';
+});
+
+
 // remove everything but numbers
 $view->addFilter('onlynumbers', function ($str) {
     return preg_replace("/[^0-9]/", "", $str);
@@ -242,9 +260,7 @@ $view->addFilter('onlynumbers', function ($str) {
  * Remove http, www or ending / from links
  *
  * @param string $url
- *
  * @param string $remove
- *
  * @return mixed|string
  */
 $view->addFilter('niceurl', function ($url = null, $remove = 'httpwww/') {
@@ -282,7 +298,6 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
         $args = func_get_args();
     }
 
-
     if (isset($args[1])) {
         $key = $args[1];
     } else {
@@ -292,7 +307,6 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     $p = (isset($args[0]) && !empty($args[0])) ? $args[0] : wire('pages')->get(1);
     $language = isset($args[2]) ? $args[2] : $originalLang;
     $recursive = isset($args[3]) ? $args[3] : true;
-
 
     // allow only page ID to be passed
     if (is_numeric($p)) {
@@ -322,6 +336,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     return $result;
 });
 
+
 /**
  * Return sanitized value using ProcessWire's sanitizer
  *
@@ -329,7 +344,6 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
  * {$p->body|sanitize:'text', array('multiLine' => true, 'stripTags' => false)}
  * {('2017/02/28')|sanitize:'date', 'YYY F j.', array('returnFormat' => 'Y. F j.')}
  */
-
 $view->addFilter('sanitize', function ($value = null, $fx = null, $options = null) {
 
     if (is_null($value)|| is_null($fx))
@@ -350,6 +364,7 @@ $view->addFilter('sanitize', function ($value = null, $fx = null, $options = nul
 
     return $out;
 });
+
 
 // alias to "sanitize"
 $view->addFilter('sanitizer', function () use ($view) {
