@@ -4,6 +4,9 @@
 ### 0.3.1 (2017-02-15)
 
 - added 'default' filter
+- added 'bgimage' filter
+- added 'consolelog' filter
+- added 'bd, bdl, dump, d' filters (requires Tracy Debugger module)
 
 
 

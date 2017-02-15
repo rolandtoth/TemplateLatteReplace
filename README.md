@@ -540,6 +540,38 @@ Returns the number of items in PageArray. Can be used for checking if there's an
 </div>
 ```
 
+
+**bgimage**
+
+Adds an inline style with background-image: url(...).
+
+```php
+<div {$page->featured_image->size(1180,320)|bgimage|noescape}></div>
+// result:
+// <div style="background-image: url('/site/assets/files/1/image.1180x320.jpg')"></div>
+```
+
+
+**bd, bdl, d**
+
+Fires bd(), bdl() or d() functions of Tracy Debugger module.
+
+```php
+{$page->title|bd}
+{$page->title|bdl}
+{$page->title|d}
+```
+
+
+**consolelog**
+
+Logs to the console (developer tools).
+
+```php
+{$page->title|consolelog}
+```
+
+
 **breadcrumb**
 
 Generates markup (unordered HTML list) for breadcrumbs. Note that no separator is added, use CSS for that.

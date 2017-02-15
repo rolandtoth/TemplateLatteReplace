@@ -91,8 +91,8 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
         'listMarkup' => "<ul class='pagination'>{out}</ul>",
         'itemMarkup' => "<li class='{class}'>{out}</li>",
         'linkMarkup' => "<a href='{url}'><span>{out}</span></a>",
-        'nextItemLabel'      => '→',
-        'previousItemLabel'  => '←',
+        'nextItemLabel' => '→',
+        'previousItemLabel' => '←',
         'separatorItemLabel' => '',
         'separatorItemClass' => '',
         'nextItemClass' => 'next',
@@ -250,6 +250,39 @@ $view->addFilter('bgimage', function ($img = null) {
 });
 
 
+// barDump (needs TracyDebugger module)
+$view->addFilter('bd', function ($data = null) {
+    if (!is_null($data) && function_exists('bd')) bd($data);
+});
+
+// barDump long (needs TracyDebugger module)
+$view->addFilter('bdl', function ($data = null) {
+    if (!is_null($data) && function_exists('bdl')) bdl($data);
+});
+
+// dump (needs TracyDebugger module)
+$view->addFilter('d', function ($data = null) {
+    if (!is_null($data) && function_exists('d')) d($data);
+});
+
+// alias to "d"
+$view->addFilter('dump', function () use ($view) {
+    return $view->invokeFilter('d', func_get_args());
+});
+
+// write to console log
+$view->addFilter('consolelog', function ($data = null) {
+
+    if (!is_null($data)) {
+
+        if (is_array($data))
+            $data = implode(',', $data);
+
+        echo '<script>console.log("' . $data . '");</script>';
+    }
+});
+
+
 // remove everything but numbers
 $view->addFilter('onlynumbers', function ($str) {
     return preg_replace("/[^0-9]/", "", $str);
@@ -346,7 +379,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
  */
 $view->addFilter('sanitize', function ($value = null, $fx = null, $options = null) {
 
-    if (is_null($value)|| is_null($fx))
+    if (is_null($value) || is_null($fx))
         return false;
 
     if (is_null($options)) {
