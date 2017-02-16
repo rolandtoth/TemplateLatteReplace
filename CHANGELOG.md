@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.2 (2017-02-16)
+
+- multilanguage fix for 'getsetting' filter
+- documentation fix for 'n:pages'
+
+
 ### 0.3.1 (2017-02-15)
 
 - added 'default' filter

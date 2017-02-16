@@ -417,7 +417,7 @@ Simlar to the "page" filter but returns a PageArray (loaded to "$pArr") instead 
 
 
 ```php
-<ul n:pages="template=basic-page,limit=10" n:inner-foreach="$pArr as $p">
+<ul n:pages="'template=basic-page,limit=10'" n:inner-foreach="$pArr as $p">
     <li>{$p->title}</li>
 </ul>
 ```

@@ -341,6 +341,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     $language = isset($args[2]) ? $args[2] : $originalLang;
     $recursive = isset($args[3]) ? $args[3] : true;
 
+
     // allow only page ID to be passed
     if (is_numeric($p)) {
         $p = wire('pages')->get($p);
@@ -354,7 +355,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
 
     // try default language if value not found
     if ($isMultiLang && is_null($result) && $recursive) {
-        $result = $view->invokeFilter('getsetting', array($key, $p, 'default', false));
+        $result = $view->invokeFilter('getsetting', array($p, $key, 'default', false));
     }
 
     // return empty string if it's literally set to NULL
