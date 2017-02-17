@@ -216,7 +216,7 @@ $view->addFilter('lazy', function ($img = null, $divisor = 4) {
 
     $divisor = (int)$divisor;
 
-    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 0)
+    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1)
         return false;
 
     // get width and height pixel values from the current resized image and resize the original
@@ -261,12 +261,10 @@ $view->addFilter('bd', function ($data = null) {
     if (!is_null($data) && function_exists('bd')) bd($data);
 });
 
-
 // barDump long (needs TracyDebugger module)
 $view->addFilter('bdl', function ($data = null) {
     if (!is_null($data) && function_exists('bdl')) bdl($data);
 });
-
 
 // dump (needs TracyDebugger module)
 $view->addFilter('d', function ($data = null) {
@@ -351,6 +349,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     $language = isset($args[2]) ? $args[2] : $originalLang;
     $recursive = isset($args[3]) ? $args[3] : true;
 
+
     // allow only page ID to be passed
     if (is_numeric($p)) {
         $p = wire('pages')->get($p);
@@ -384,7 +383,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
  * Surround item or array of items with html tag
  *
  * {$page->title|surround:'h2'|noescape}
- * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children list of {$page->title}"'|noescape}
+ * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children of {$page->title}"'|noescape}
  */
 $view->addFilter('surround', function ($data = null, $startTag = null) {
 
