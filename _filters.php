@@ -205,24 +205,50 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
 });
 
 /**
- * Lazysizes helper filter
+ * LazySizes helper filter
  * Requires lazysizes.js added manually and adding the "lazyload" class to img
  * https://github.com/aFarkas/lazysizes
  *
  * <img src="{$page->images->first()->width(900)|lazy|noescape}" alt="" class="lazyload" />
  * <img src="{$page->images->first()->width(900)|lazy:3|noescape}" alt="" class="lazyload" />
+ *
  */
-$view->addFilter('lazy', function ($img = null, $divisor = 4) {
+$view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img') {
 
-    $divisor = (int)$divisor;
 
-    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1)
-        return false;
+    $divisor = is_null($divisor) ? 4 : (int)$divisor;
+
+    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1) return false;
+
+    $markup = '';
 
     // get width and height pixel values from the current resized image and resize the original
-    $imgSmall = $img->getOriginal()->size($img->width/$divisor, $img->height/$divisor, array('quality' => 70));
+    $imgSmall = $img->getOriginal()->size($img->width / $divisor, $img->height / $divisor, array('quality' => 70));
 
-    return $imgSmall->url . '" data-src="' . $img->url;
+    if ($type === 'img') {
+        $markup = $imgSmall->url . '"data-src="' . $img->url;
+    } else if ($type === 'bg') {
+        $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
+    }
+
+    return $markup;
+});
+
+
+/**
+ * LazySizes helper filter for bgset plugin
+ * https://github.com/aFarkas/lazysizes/tree/gh-pages/plugins/bgset
+ *
+ * Requires lazysizes.js and ls.bgset.js added manually and adding the "lazyload" class to the element
+ *
+ * <div {$page->images->first()->width(900)|bgset|noescape}" alt="" class="lazyload"></div>
+ * <div {$page->images->first()->width(900)|bgset:4|noescape}" alt="" class="lazyload"></div>
+ * */
+$view->addFilter('bgset', function () use ($view) {
+    $args = func_get_args();
+    if (!isset($args[1])) $args[1] = null;   // ensure there's a second parameter
+    $args[] = 'bg';
+    return $view->invokeFilter('lazy', $args);
 });
 
 
