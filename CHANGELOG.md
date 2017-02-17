@@ -1,10 +1,18 @@
 #Changelog
 
 
+### 0.3.3 (2017-02-17)
+
+- added 'surround' and 'lazy' filters
+- documentation move do GitHub wiki
+
+
+
 ### 0.3.2 (2017-02-16)
 
 - multilanguage fix for 'getsetting' filter
 - documentation fix for 'n:pages'
+
 
 
 ### 0.3.1 (2017-02-15)

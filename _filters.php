@@ -204,20 +204,26 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
     return $value;
 });
 
+/**
+ * Lazysizes helper filter
+ * Requires lazysizes.js added manually and adding the "lazyload" class to img
+ * https://github.com/aFarkas/lazysizes
+ *
+ * <img src="{$page->images->first()->width(900)|lazy|noescape}" alt="" class="lazyload" />
+ * <img src="{$page->images->first()->width(900)|lazy:3|noescape}" alt="" class="lazyload" />
+ */
+$view->addFilter('lazy', function ($img = null, $divisor = 4) {
 
-//$view->addFilter('lazy', function ($img = null, $sizes) {
-//
-//    if (is_null($img) || !($img instanceof Pageimage))
-//        return false;
-//
-//    $width = $sizes[0];
-//    $height = $sizes[1];
-//
-//    $imgFull = $img->size($width, $height);
-//    $imgSmall = $img->size($width/4, $height/4);
-//
-//    return $imgSmall->url . '" data-src="' . $imgFull->url;
-//});
+    $divisor = (int)$divisor;
+
+    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 0)
+        return false;
+
+    // get width and height pixel values from the current resized image and resize the original
+    $imgSmall = $img->getOriginal()->size($img->width/$divisor, $img->height/$divisor, array('quality' => 70));
+
+    return $imgSmall->url . '" data-src="' . $img->url;
+});
 
 
 // count PageArray
@@ -255,20 +261,24 @@ $view->addFilter('bd', function ($data = null) {
     if (!is_null($data) && function_exists('bd')) bd($data);
 });
 
+
 // barDump long (needs TracyDebugger module)
 $view->addFilter('bdl', function ($data = null) {
     if (!is_null($data) && function_exists('bdl')) bdl($data);
 });
+
 
 // dump (needs TracyDebugger module)
 $view->addFilter('d', function ($data = null) {
     if (!is_null($data) && function_exists('d')) d($data);
 });
 
+
 // alias to "d"
 $view->addFilter('dump', function () use ($view) {
     return $view->invokeFilter('d', func_get_args());
 });
+
 
 // write to console log
 $view->addFilter('consolelog', function ($data = null) {
@@ -341,7 +351,6 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     $language = isset($args[2]) ? $args[2] : $originalLang;
     $recursive = isset($args[3]) ? $args[3] : true;
 
-
     // allow only page ID to be passed
     if (is_numeric($p)) {
         $p = wire('pages')->get($p);
@@ -368,6 +377,33 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     }
 
     return $result;
+});
+
+
+/**
+ * Surround item or array of items with html tag
+ *
+ * {$page->title|surround:'h2'|noescape}
+ * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children list of {$page->title}"'|noescape}
+ */
+$view->addFilter('surround', function ($data = null, $startTag = null) {
+
+    if (is_null($data) || is_null($startTag)) return false;
+    if (!is_array($data)) $data = array($data);
+
+    if (strpos($startTag, ' ') !== false) {
+        $arr = explode(' ', $startTag, 2);
+        $endTag = $arr[0];
+    } else {
+        $endTag = $startTag;
+    }
+
+    $startTag = '<' . $startTag . '>';
+    $endTag = '</' . $endTag . '>';
+
+    $markup = implode($endTag . $startTag, $data);
+
+    return $startTag . $markup . $endTag;
 });
 
 
