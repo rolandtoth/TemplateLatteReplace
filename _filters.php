@@ -32,6 +32,9 @@ $view->addFilter('bodyclass', function ($p) {
         if (!in_array($p->parent->id, array(0, 1)))
             $class[] = "parent-" . $p->parent->id;
 
+        if ($pageNum = wire('input')->pageNum) {
+            if ($pageNum > 1) $class[] = "pagenum-" . $pageNum;
+        }
 
         if ($this->wire('user')->language)
             $class[] = "lang-" . $this->wire('user')->language->name;
