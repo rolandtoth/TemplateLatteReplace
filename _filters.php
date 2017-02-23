@@ -218,7 +218,6 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
  */
 $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img') {
 
-
     $divisor = is_null($divisor) ? 4 : (int)$divisor;
 
     if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1) return false;
@@ -323,6 +322,90 @@ $view->addFilter('consolelog', function ($data = null) {
 // remove everything but numbers
 $view->addFilter('onlynumbers', function ($str) {
     return preg_replace("/[^0-9]/", "", $str);
+});
+
+
+/**
+ * Protect email
+ * based on https://github.com/minetro/latte-email
+ *
+ * Modes: javascript, javascript_charcode, hex, drupal, texy
+ *
+ * {$email|protectemail|noescape}
+ * {$email|protectemail:'javascript'|noescape}
+ * {$email|v:'hex','Email me','class="mailto-link"'|noescape}
+ * {$email . '?subject=The%20subject%20of%20the%20mail'|protectemail:'js','Email me','class="button"'|noescape}
+ */
+$view->addFilter('protectemail', function ($address, $encode = 'javascript', $text = null, $extra = null) {
+
+    $_text = $text == null ? $address : $text;
+    $_extra = $extra == null ? '' : ' ' . $extra;
+
+    if ($encode == 'javascript' || $encode == 'js') {
+
+        $string = 'document.write(\'<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>\');';
+
+        $js_encode = '';
+
+        for ($x = 0, $_length = strlen($string); $x < $_length; $x++) {
+            $js_encode .= '%' . bin2hex($string[$x]);
+        }
+
+        return '<script>eval(decodeURIComponent(\'' . $js_encode . '\'))</script>';
+
+    } elseif ($encode == 'javascript_charcode') {
+
+        $string = '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+
+        for ($x = 0, $y = strlen($string); $x < $y; $x++) {
+            $ord[] = ord($string[$x]);
+        }
+
+        return "<script>{document.write(String.fromCharCode(" . implode(',', $ord) . "))}</script>";
+
+    } elseif ($encode == 'hex') {
+
+        preg_match('!^(.*)(\?.*)$!', $address, $match);
+
+        if (!empty($match[2])) {
+            trigger_error("mailto: hex encoding does not work with extra attributes. Try javascript.", E_USER_WARNING);
+            return false;
+        }
+
+        $address_encode = '';
+        for ($x = 0, $_length = strlen($address); $x < $_length; $x++) {
+            if (preg_match('!\w!u', $address[$x])) {
+                $address_encode .= '%' . bin2hex($address[$x]);
+            } else {
+                $address_encode .= $address[$x];
+            }
+        }
+
+        $text_encode = '';
+        for ($x = 0, $_length = strlen($_text); $x < $_length; $x++) {
+            $text_encode .= '&#x' . bin2hex($_text[$x]) . ';';
+        }
+
+        $mailto = "&#109;&#97;&#105;&#108;&#116;&#111;&#58;";
+
+        return '<a href="' . $mailto . $address_encode . '"' . $_extra . '>' . $text_encode . '</a>';
+
+    } else if ($encode == 'drupal') {
+
+        $address = str_replace('@', '[at]', $address);
+        $_text = $text == null ? $address : $_text;
+
+        return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+
+    } else if ($encode == 'texy') {
+        $address = str_replace('@', '<!-- ANTISPAM -->&#64;<!-- /ANTISPAM -->', $address);
+        $_text = $text == null ? $address : $_text;
+
+        return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+    }
+
+    // no encoding
+    return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
 });
 
 

@@ -1,7 +1,6 @@
 <?php namespace ProcessWire;
 
 use Latte\Engine;
-use Latte\Macros\MacroSet;
 
 /**
  * Latte template engine support for ProcessWire.
@@ -39,7 +38,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary' => __('Latte template engine support for ProcessWire.', __FILE__),
             'href' => '',
             'author' => 'Roland Toth',
-            'version' => 34,
+            'version' => 35,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -187,7 +186,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 //            }
         }
 
-            $event->return = $markup;
+        $event->return = $markup;
 
         // fix html entity encoder issues
 //        $event->return = htmlspecialchars_decode($markup);
@@ -220,8 +219,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         // set default layout file (as of Latte 2.4)
         $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
-
-//            bd($template);
 
             if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
                 $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);

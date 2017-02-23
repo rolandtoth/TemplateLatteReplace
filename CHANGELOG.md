@@ -1,9 +1,16 @@
 #Changelog
 
 
+### 0.3.5 (2017-02-23)
+
+- added 'protectemail' filter
+
+
+
 ### 0.3.4 (2017-02-20)
 
 - added pagination classes to 'bodyclass' filter
+
 
 
 ### 0.3.3 (2017-02-17)
