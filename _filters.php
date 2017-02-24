@@ -264,6 +264,41 @@ $view->addFilter('count', function ($selector = null) {
 });
 
 
+/**
+ * Generates markup for responsive iframe embed
+ *
+ * @param string $url the embed url
+ * @param array $args options
+ *
+ * @return string
+ */
+$view->addFilter('embediframe', function ($url, $args = null) {
+
+    if (strlen($url) == 0) return false;
+
+    $defaults = array(
+        'width' => 560,
+        'height' => 315,
+        'attr' => '',
+        'wrapAttr' => 'class="embed-wrap"',
+        'srcAttr' => 'src'
+    );
+
+    $args = is_array($args) ? array_merge($defaults, $args) : $defaults;
+
+    extract($args);
+
+    $width = !is_integer($width) ? 560 : $width;
+    $height = !is_integer($height) ? 315 : $height;
+
+    $ratio = round($height / $width * 100, 2);
+
+    return <<< HTML
+    <div $wrapAttr><div style="padding-bottom:$ratio%"><iframe width="$width" height="$height" $srcAttr="$url" $attr></iframe></div></div>
+HTML;
+});
+
+
 // get parent
 $view->addFilter('getparent', function ($selector = null) {
 

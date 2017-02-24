@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.6 (2017-02-24)
+
+- added 'embediframe' filter
+
+
+
 ### 0.3.5 (2017-02-23)
 
 - added 'protectemail' filter
