@@ -279,6 +279,7 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $defaults = array(
         'width' => 560,
         'height' => 315,
+        'upscale' => true,
         'attr' => '',
         'wrapAttr' => 'class="embed-wrap"',
         'srcAttr' => 'src'
@@ -290,6 +291,8 @@ $view->addFilter('embediframe', function ($url, $args = null) {
 
     $width = !is_integer($width) ? 560 : $width;
     $height = !is_integer($height) ? 315 : $height;
+
+    if($upscale === false) $wrapAttr .= ' style="max-width:' . $width . 'px;" ';
 
     $ratio = round($height / $width * 100, 2);
 
