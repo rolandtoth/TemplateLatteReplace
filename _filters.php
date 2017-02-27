@@ -292,7 +292,7 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $width = !is_integer($width) ? 560 : $width;
     $height = !is_integer($height) ? 315 : $height;
 
-    if($upscale === false) $wrapAttr .= ' style="max-width:' . $width . 'px;" ';
+    if ($upscale === false) $wrapAttr .= ' style="max-width:' . $width . 'px;" ';
 
     $ratio = round($height / $width * 100, 2);
 
@@ -530,33 +530,6 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
 
 
 /**
- * Surround item or array of items with html tag
- *
- * {$page->title|surround:'h2'|noescape}
- * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children of {$page->title}"'|noescape}
- */
-$view->addFilter('surround', function ($data = null, $startTag = null) {
-
-    if (is_null($data) || is_null($startTag)) return false;
-    if (!is_array($data)) $data = array($data);
-
-    if (strpos($startTag, ' ') !== false) {
-        $arr = explode(' ', $startTag, 2);
-        $endTag = $arr[0];
-    } else {
-        $endTag = $startTag;
-    }
-
-    $startTag = '<' . $startTag . '>';
-    $endTag = '</' . $endTag . '>';
-
-    $markup = implode($endTag . $startTag, $data);
-
-    return $startTag . $markup . $endTag;
-});
-
-
-/**
  * Return sanitized value using ProcessWire's sanitizer
  *
  * {('Lorem ipsum')|sanitize:'fieldName'}
@@ -589,3 +562,139 @@ $view->addFilter('sanitize', function ($value = null, $fx = null, $options = nul
 $view->addFilter('sanitizer', function () use ($view) {
     return $view->invokeFilter('sanitize', func_get_args());
 });
+
+
+
+// truncate html
+$view->addFilter('truncatehtml', function () {
+    return call_user_func_array(array('ProcessWire\Text', 'truncateHtmlText'), func_get_args());
+});
+
+
+
+
+/**
+ * Surround item or array of items with html tag
+ *
+ * {$page->title|surround:'h2'|noescape}
+ * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children of {$page->title}"'|noescape}
+ */
+$view->addFilter('surround', function ($data = null, $startTag = null) {
+
+    if (is_null($data) || is_null($startTag)) return false;
+    if (!is_array($data)) $data = array($data);
+
+    if (strpos($startTag, ' ') !== false) {
+        $arr = explode(' ', $startTag, 2);
+        $endTag = $arr[0];
+    } else {
+        $endTag = $startTag;
+    }
+
+    $startTag = '<' . $startTag . '>';
+    $endTag = '</' . $endTag . '>';
+
+    $markup = implode($endTag . $startTag, $data);
+
+    return $startTag . $markup . $endTag;
+});
+
+
+/**
+ * Class Text
+ * // http://www.phpsnippets.cz/latte-makro-pro-oriznuti-textu-s-html-tagy
+ * @author Ondra Votava ondra.votava@phpsnippets.cz
+ * @copyright Ondra Votava ondra.votava@phpsnippets.cz
+ * @package CreativeDesign\Utils
+ *
+ *          Text Helpers
+ */
+class Text {
+    /**
+     * Truncate HTML text and restore tags
+     * @param string $string
+     * @param int $limit
+     * @param string $break
+     * @param string $pad
+     *
+     * @return string
+     */
+    public static function truncateHtmlText($string, $limit = null, $break = null, $pad = null)
+    {
+        if($limit === false) return $string; // false: disable truncate
+
+        if(is_null($limit)) $limit = 120;   // use null to use global defalt limit
+        if(is_null($pad)) $pad = '…';   // use null to use global defalt pad
+        if(is_null($break)) $break = ' ';
+
+        // pokud je text kratší než je požadováno vrátíme celý $string
+        if (mb_strlen($string, 'UTF-8') <= $limit) return $string;
+        // existuje $break mezi $limit a koncem $string?
+        if (false !== ($breakpoint = mb_strpos($string, $break, $limit, "UTF-8"))) {
+            if ($breakpoint < mb_strlen($string, 'UTF-8') - 1) {
+                $string = mb_substr($string, 0, $breakpoint, "UTF-8") . $pad;
+            }
+        }
+        return self::restoreHtmlTags($string, $pad);
+        // return $string;
+    }
+
+    /**
+     * @param string $string
+     * @param string $pad
+     *
+     * @return string
+     */
+    public static function restoreHtmlTags($string, $pad = " ...")
+    {
+        //zkotrolujeme ze jsou vsechny tagy ukoncene (cele) pokud ne tak je odstranime
+//        $prereg = "#((<[a-z1-9]+(?:\n| ).*)((?:>|$))|(<[a-z](?:>|$)))#miU";
+        // https://kevin.deldycke.com/2007/03/ultimate-regular-expression-for-html-tag-parsing-with-php/
+        $prereg = "/<\/?\w+((\s+(\w|\w[\w-]*\w)(\s*=\s*(?:\".*?\"|'.*?'|[^'\">\s]+))?)+\s*|\s*)\/?>/i";
+        preg_match_all($prereg, $string, $match);
+        $uncomplete = $match[0];
+        bd($string);
+        $uncomplete = array_reverse($uncomplete);
+        if (!self::endsWith($uncomplete[0], ">")) {
+            $re = "#(" . $uncomplete[0] . ")$#miU";
+            $string = preg_replace($re, $pad, $string, -1, $count);
+        }
+        // najdeme všechny otevřené tagy
+        $re = "#<(?!meta|img|br|hr|input\b)\b([a-z1-9]+)((\n| ).*)?(?<![\/|\/ ])>#imU";
+        preg_match_all($re, $string, $match);
+        $openedtags = $match[1];
+        // najdeme všechny uzavřené tagy
+        preg_match_all("#<\/([a-z1-9]+)>#iU", $string, $match);
+        $closedtags = $match[1];
+        $len_opened = count($openedtags);
+        // pokud jsou všechny tagy uzavřeny vrátime $string
+        if (count($closedtags) == $len_opened) {
+            return $string;
+        }
+        $openedtags = array_reverse($openedtags);
+        // zavřeme tagy
+        for ($i = 0; $i < $len_opened; $i++) {
+            if (!in_array($openedtags[$i], $closedtags)) {
+                $string .= "</" . $openedtags[$i] . ">";
+            } else {
+                unset ($closedtags[array_search($openedtags[$i], $closedtags)]);
+            }
+        }
+        return $string;
+    }
+
+    /**
+     * @param $haystack
+     * @param $needle
+     *
+     * @return bool
+     */
+    public static function endsWith($haystack, $needle)
+    {
+        $length = strlen($needle);
+        if ($length == 0) {
+            return true;
+        }
+        return (substr($haystack, -$length) === $needle);
+    }
+}

@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.7 (2017-02-27)
+
+- added 'truncatehtml' filter
+
+
+
 ### 0.3.6 (2017-02-24)
 
 - added 'embediframe' filter
