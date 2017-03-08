@@ -572,17 +572,31 @@ $view->addFilter('truncatehtml', function () {
 
 
 
+/**
+ * List array items with a separator
+ * Same as built-in implode filter but accepts strings too
+ */
+$view->addFilter('list', function ($items, $separator = ' ') {
+    // array_filter removes empty items
+    return !is_array($items) ? $items : implode($separator, array_filter($items));
+});
+
+
 
 /**
  * Surround item or array of items with html tag
  *
  * {$page->title|surround:'h2'|noescape}
+ * {$page->title|surround:'<h2>'|noescape}
  * {$page->children->title()|surround:'li'|surround:'ul class="list" data-tooltip="Children of {$page->title}"'|noescape}
  */
 $view->addFilter('surround', function ($data = null, $startTag = null) {
 
     if (is_null($data) || is_null($startTag)) return false;
     if (!is_array($data)) $data = array($data);
+
+    // strip start and end angle brackets
+    $startTag = trim($startTag, '<>');
 
     if (strpos($startTag, ' ') !== false) {
         $arr = explode(' ', $startTag, 2);
