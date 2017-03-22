@@ -228,7 +228,7 @@ $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img') 
     $imgSmall = $img->getOriginal()->size($img->width / $divisor, $img->height / $divisor, array('quality' => 70));
 
     if ($type === 'img') {
-        $markup = $imgSmall->url . '"data-src="' . $img->url;
+        $markup = $imgSmall->url . '" data-src="' . $img->url;
     } else if ($type === 'bg') {
         $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
     }

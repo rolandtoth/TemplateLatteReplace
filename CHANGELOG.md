@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.8 (2017-03-22)
+
+- new macros: 'minify' and 'editlink'
+
+
+
 ### 0.3.7 (2017-02-27)
 
 - added 'truncatehtml' filter
