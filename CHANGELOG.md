@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.3.9 (2017-03-24)
+
+- 'editlink' macro updates
+
+
+
 ### 0.3.8 (2017-03-22)
 
 - new macros: 'minify' and 'editlink'

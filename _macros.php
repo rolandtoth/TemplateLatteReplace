@@ -28,6 +28,7 @@ $view->addMacro(
 );
 
 
+
 $view->addMacro(
     'editlink',
     function (MacroNode $node, PhpWriter $writer) {
@@ -38,12 +39,18 @@ $view->addMacro(
             
             $defaults = array(
                 "target" => $wire->page,
-                "class" => "edit-link",
                 "text" => "Edit",
-                "targetAttr" => "_blank"
+                "attrs" => "",
+                "urlparams" => ""
             );
             
             if(count($args) == 1) $args = array("target" => $args[0]);
+            
+            // if first argument is instance of Page, set target page
+            if(isset($args[0]) && $args[0] instanceof \processWire\Page) {
+                $args["target"] = $args[0];
+                unset($args[0]);
+            }
             
             $args = array_merge($defaults, $args);
 
@@ -53,11 +60,11 @@ $view->addMacro(
             
             if ($target instanceof \ProcessWire\Page && $target->editable() && $target->template != "admin" && $user->isLoggedin()) {
 	            
-	            $lang = $user->language ? "&language=" . $user->language->id : "";
-	            $edit_url = $target->editUrl . $lang;
+	            $edit_url = $target->editUrl;
+	            $urlparams = ($user->language ? "&language=" . $user->language->id : "") . $urlparams;
 	            
 	            echo <<< HTML
-    <a href="$edit_url" class="$class" target="$targetAttr">$text</a>
+    <a href="{$edit_url}{$urlparams}" $attrs>$text</a>
 HTML;
 	            
             }
