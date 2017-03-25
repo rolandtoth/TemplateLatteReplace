@@ -28,7 +28,6 @@ $view->addMacro(
 );
 
 
-
 $view->addMacro(
     'editlink',
     function (MacroNode $node, PhpWriter $writer) {
@@ -44,6 +43,14 @@ $view->addMacro(
                 "urlparams" => ""
             );
             
+            // merge common defaults from $view->editlinkDefaults (eg. ready.php)
+            if(!empty($editlinkDefaults)) {
+                $defaults = array_merge($defaults, $editlinkDefaults);
+            }
+            
+            // merge parameters from latte file
+            $args = array_merge($defaults, $args);
+            
             if(count($args) == 1) $args = array("target" => $args[0]);
             
             // if first argument is instance of Page, set target page
@@ -51,8 +58,6 @@ $view->addMacro(
                 $args["target"] = $args[0];
                 unset($args[0]);
             }
-            
-            $args = array_merge($defaults, $args);
 
             extract($args);
         
@@ -64,7 +69,7 @@ $view->addMacro(
 	            $urlparams = ($user->language ? "&language=" . $user->language->id : "") . $urlparams;
 	            
 	            echo <<< HTML
-    <a href="{$edit_url}{$urlparams}" $attrs>$text</a>
+    <a href="{$edit_url}{$urlparams}" data-editlink $attrs>$text</a>
 HTML;
 	            
             }

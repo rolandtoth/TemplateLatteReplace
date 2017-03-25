@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.4.0 (2017-03-25)
+
+- 'editlink' macro updates
+
+
+
 ### 0.3.9 (2017-03-24)
 
 - 'editlink' macro updates

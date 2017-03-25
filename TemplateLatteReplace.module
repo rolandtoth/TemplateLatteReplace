@@ -20,8 +20,7 @@ use Latte\Engine;
  *
  * @package ProcessWire
  */
-class TemplateLatteReplace extends WireData implements Module, ConfigurableModule
-{
+class TemplateLatteReplace extends WireData implements Module, ConfigurableModule {
 
     public $cacheDir;
     public $viewsDir;
@@ -31,18 +30,17 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     /**
      * Basic information about module
      */
-    public static function getModuleInfo()
-    {
+    public static function getModuleInfo() {
         return array(
-            'title' => 'Template Latte Replace',
-            'summary' => __('Latte template engine support for ProcessWire.', __FILE__),
-            'href' => '',
-            'author' => 'Roland Toth',
-            'version' => 39,
+            'title'    => 'Template Latte Replace',
+            'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
+            'href'     => '',
+            'author'   => 'Roland Toth',
+            'version'  => 40,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
-            'icon' => 'code'
+            'icon'     => 'code'
         );
     }
 
@@ -50,21 +48,20 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Default configuration for module
      *
      */
-    static public function getDefaultData()
-    {
+    static public function getDefaultData() {
 
         return array(
-            "cacheDir" => str_replace('ProcessWire\\', '', __CLASS__),
-            "api_var" => 'view',
-            "viewsDir" => '',
+            "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
+            "api_var"           => 'view',
+            "viewsDir"          => '',
             "defaultTextdomain" => '/site/templates/_strings.php',
             "defaultLayoutFile" => '@layout.latte',
-            "options" => array(
+            "options"           => array(
                 'extraMacros',
                 'extraFilters'
                 //'useLatteExtension',
             ),
-            "fuels" => array(
+            "fuels"             => array(
                 'config',
                 'fields',
                 'input',
@@ -85,15 +82,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Populate the default config data
      *
      */
-    public function __construct()
-    {
+    public function __construct() {
         foreach (self::getDefaultData() as $key => $value) {
             $this->$key = $value;
         }
     }
 
-    public function ___uninstall()
-    {
+    public function ___uninstall() {
         // remove cache dir
         $cacheDir = wire('config')->paths->cache . $this->cacheDir;
 
@@ -102,8 +97,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
     }
 
-    public function init()
-    {
+    public function init() {
         if (in_array('useLatteExtension', $this->options)) {
             $this->wire('config')->templateExtension = 'latte';
         }
@@ -113,8 +107,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * Initialize the module and setup hooks
      *
      */
-    public function ready()
-    {
+    public function ready() {
 
         if ($this->wire('page')->template == 'admin') {
             return;
@@ -155,9 +148,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
     }
 
-
-    public function hookRender(HookEvent $event)
-    {
+    public function hookRender(HookEvent $event) {
 
         $templateFile = $event->object;
 
@@ -203,8 +194,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      *
      * @return Engine
      */
-    public function getLatte()
-    {
+    public function getLatte() {
 
         if (is_object($this->latte))
             return $this->latte;
@@ -242,8 +232,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      *
      * @return string
      */
-    public function renderLatteString($templateFilename)
-    {
+    public function renderLatteString($templateFilename) {
 
         $latte = $this->getLatte();
         $view = $this->wire($this->api_var);
@@ -274,8 +263,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
 
-    public function removeDoubleSlashes($str)
-    {
+    public function removeDoubleSlashes($str) {
         return str_replace('//', '/', $str);
     }
 
@@ -287,8 +275,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      * @return InputfieldWrapper
      *
      */
-    public static function getModuleConfigInputfields(array $data)
-    {
+    public static function getModuleConfigInputfields(array $data) {
 
         $defaultData = self::getDefaultData();
         $data = array_merge($defaultData, $data);
