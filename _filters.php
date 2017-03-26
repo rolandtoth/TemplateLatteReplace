@@ -87,22 +87,27 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
     if (is_null($pArr) || !($pArr instanceof PageArray))
         return false;
 
+    $view = $this->wire($this->api_var);
+
     $paginationSettings = array(
-        'numPageLinks' => 10, // Default: 10
-        'getVars' => null, // Default: empty array
-        'baseUrl' => array(), // Default: empty
-        'listMarkup' => "<ul class='pagination'>{out}</ul>",
-        'itemMarkup' => "<li class='{class}'>{out}</li>",
-        'linkMarkup' => "<a href='{url}'><span>{out}</span></a>",
-        'nextItemLabel' => '→',
-        'previousItemLabel' => '←',
+        'numPageLinks'       => 10, // Default: 10
+        'getVars'            => array(), // Default: empty array
+        'baseUrl'            => '', // Default: empty
+        'listMarkup'         => "<ul class='pagination'>{out}</ul>",
+        'itemMarkup'         => "<li class='{class}'>{out}</li>",
+        'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
+        'nextItemLabel'      => '→',
+        'previousItemLabel'  => '←',
         'separatorItemLabel' => '',
         'separatorItemClass' => '',
-        'nextItemClass' => 'next',
-        'previousItemClass' => 'previous',
-        'lastItemClass' => 'last',
-        'currentItemClass' => 'active'
+        'nextItemClass'      => 'next',
+        'previousItemClass'  => 'previous',
+        'lastItemClass'      => 'last',
+        'currentItemClass'   => 'active'
     );
+
+    // merge common defaults from $view->renderPagerDefaults (eg. ready.php)
+    $paginationSettings = array_merge($paginationSettings, isset($view->renderPagerDefaults) ? $view->renderPagerDefaults : array());
 
     if (!is_null($options)) {
         if (is_array($options)) {   // merge user options
@@ -131,6 +136,9 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
         $args = array($args);
 
     $markup = '';
+
+    $view = $this->wire($this->api_var);
+    $args = array_merge($args, isset($view->breadcrumbDefaults) ? $view->breadcrumbDefaults : array());
 
     $root = isset($args['root']) ? $args['root'] : 1;
     $addHome = isset($args['addHome']) ? $args['addHome'] : true;
@@ -250,6 +258,7 @@ $view->addFilter('bgset', function () use ($view) {
     $args = func_get_args();
     if (!isset($args[1])) $args[1] = null;   // ensure there's a second parameter
     $args[] = 'bg';
+
     return $view->invokeFilter('lazy', $args);
 });
 
@@ -276,14 +285,18 @@ $view->addFilter('embediframe', function ($url, $args = null) {
 
     if (strlen($url) == 0) return false;
 
+    $view = $this->wire($this->api_var);
+
     $defaults = array(
-        'width' => 560,
-        'height' => 315,
-        'upscale' => true,
-        'attr' => '',
+        'width'    => 560,
+        'height'   => 315,
+        'upscale'  => true,
+        'attr'     => '',
         'wrapAttr' => 'class="embed-wrap"',
-        'srcAttr' => 'src'
+        'srcAttr'  => 'src'
     );
+
+    $defaults = array_merge($defaults, isset($view->embediframeDefaults) ? $view->embediframeDefaults : array());
 
     $args = is_array($args) ? array_merge($defaults, $args) : $defaults;
 
@@ -407,6 +420,7 @@ $view->addFilter('protectemail', function ($address, $encode = 'javascript', $te
 
         if (!empty($match[2])) {
             trigger_error("mailto: hex encoding does not work with extra attributes. Try javascript.", E_USER_WARNING);
+
             return false;
         }
 
@@ -452,6 +466,7 @@ $view->addFilter('protectemail', function ($address, $encode = 'javascript', $te
  *
  * @param string $url
  * @param string $remove
+ *
  * @return mixed|string
  */
 $view->addFilter('niceurl', function ($url = null, $remove = 'httpwww/') {
@@ -564,12 +579,10 @@ $view->addFilter('sanitizer', function () use ($view) {
 });
 
 
-
 // truncate html
 $view->addFilter('truncatehtml', function () {
     return call_user_func_array(array('ProcessWire\Text', 'truncateHtmlText'), func_get_args());
 });
-
 
 
 /**
@@ -580,7 +593,6 @@ $view->addFilter('list', function ($items, $separator = ' ') {
     // array_filter removes empty items
     return !is_array($items) ? $items : implode($separator, array_filter($items));
 });
-
 
 
 /**
@@ -617,15 +629,17 @@ $view->addFilter('surround', function ($data = null, $startTag = null) {
 /**
  * Class Text
  * // http://www.phpsnippets.cz/latte-makro-pro-oriznuti-textu-s-html-tagy
- * @author Ondra Votava ondra.votava@phpsnippets.cz
+ *
+ * @author    Ondra Votava ondra.votava@phpsnippets.cz
  * @copyright Ondra Votava ondra.votava@phpsnippets.cz
- * @package CreativeDesign\Utils
+ * @package   CreativeDesign\Utils
  *
  *          Text Helpers
  */
 class Text {
     /**
      * Truncate HTML text and restore tags
+     *
      * @param string $string
      * @param int $limit
      * @param string $break
@@ -633,13 +647,12 @@ class Text {
      *
      * @return string
      */
-    public static function truncateHtmlText($string, $limit = null, $break = null, $pad = null)
-    {
-        if($limit === false) return $string; // false: disable truncate
+    public static function truncateHtmlText($string, $limit = null, $break = null, $pad = null) {
+        if ($limit === false) return $string; // false: disable truncate
 
-        if(is_null($limit)) $limit = 120;   // use null to use global defalt limit
-        if(is_null($pad)) $pad = '…';   // use null to use global defalt pad
-        if(is_null($break)) $break = ' ';
+        if (is_null($limit)) $limit = 120;   // use null to use global defalt limit
+        if (is_null($pad)) $pad = '…';   // use null to use global defalt pad
+        if (is_null($break)) $break = ' ';
 
         // pokud je text kratší než je požadováno vrátíme celý $string
         if (mb_strlen($string, 'UTF-8') <= $limit) return $string;
@@ -649,6 +662,7 @@ class Text {
                 $string = mb_substr($string, 0, $breakpoint, "UTF-8") . $pad;
             }
         }
+
         return self::restoreHtmlTags($string, $pad);
         // return $string;
     }
@@ -659,8 +673,7 @@ class Text {
      *
      * @return string
      */
-    public static function restoreHtmlTags($string, $pad = " ...")
-    {
+    public static function restoreHtmlTags($string, $pad = " ...") {
         //zkotrolujeme ze jsou vsechny tagy ukoncene (cele) pokud ne tak je odstranime
 //        $prereg = "#((<[a-z1-9]+(?:\n| ).*)((?:>|$))|(<[a-z](?:>|$)))#miU";
         // https://kevin.deldycke.com/2007/03/ultimate-regular-expression-for-html-tag-parsing-with-php/
@@ -694,6 +707,7 @@ class Text {
                 unset ($closedtags[array_search($openedtags[$i], $closedtags)]);
             }
         }
+
         return $string;
     }
 
@@ -703,12 +717,12 @@ class Text {
      *
      * @return bool
      */
-    public static function endsWith($haystack, $needle)
-    {
+    public static function endsWith($haystack, $needle) {
         $length = strlen($needle);
         if ($length == 0) {
             return true;
         }
+
         return (substr($haystack, -$length) === $needle);
     }
 }
