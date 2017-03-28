@@ -1,6 +1,12 @@
 #Changelog
 
 
+### 0.4.1 (2017-03-28)
+
+- 'imageattrs' and 'getlines' filters
+
+
+
 ### 0.4.0 (2017-03-25)
 
 - 'editlink' macro updates

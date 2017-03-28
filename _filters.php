@@ -215,6 +215,69 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
     return $value;
 });
 
+
+/**
+ * Explode lines of a textarea field into an array.
+ * Empty lines and lines starting with "//" are skipped.
+ *
+ * @param string $data Field value
+ * @param string $separator separator for associative array
+ *
+ * @return array
+ */
+$view->addFilter('getlines', function ($data = null, $separator = '=') {
+
+    if (is_null($data)) return false;
+
+    $out = array();
+    $comment_identifier = '//';
+
+    $lines = trim($data);
+    $lines = explode("\n", $lines);
+    $lines = array_map('trim', $lines); //trim whitespace
+    $lines = array_filter($lines, 'trim');  // remove empty lines
+
+    $lines = array_values($lines);  // rearrange array keys to avoid gap
+
+    for ($i = 0; $i < count($lines); $i++) {
+        $line = $lines[$i];
+        $key = $i;
+
+        if (strpos(trim($line), $comment_identifier) === 0) continue;   // skip items commented out
+
+        if (strpos($line, $separator) !== false) {
+            $arr = explode($separator, $line, 2);
+            $arr = array_map('trim', $arr);
+            $key = $arr[0];
+            $line = $arr[1];
+        }
+
+        $out[$key] = $line;
+    }
+
+    return !empty($out) ? $out : $lines;
+});
+
+
+/**
+ * Adds width, height and alt attributes to an image.
+ *
+ * @param string $except attributes to skip (eg. "-alt")
+ */
+$view->addFilter('imageattrs', function ($img, $except = null) {
+
+    $alt = 'alt="' . $img->description . '"';
+
+    if (!is_null($except)) {
+        if (strpos($except, '-alt') !== false) {
+            $alt = '';
+        }
+    }
+
+    return 'width="' . $img->width . '" height="' . $img->height . '"' . $alt;
+});
+
+
 /**
  * LazySizes helper filter
  * Requires lazysizes.js added manually and adding the "lazyload" class to img
