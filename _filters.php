@@ -90,20 +90,20 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
     $view = $this->wire($this->api_var);
 
     $paginationSettings = array(
-        'numPageLinks'       => 10, // Default: 10
-        'getVars'            => array(), // Default: empty array
-        'baseUrl'            => '', // Default: empty
-        'listMarkup'         => "<ul class='pagination'>{out}</ul>",
-        'itemMarkup'         => "<li class='{class}'>{out}</li>",
-        'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
-        'nextItemLabel'      => '→',
-        'previousItemLabel'  => '←',
+        'numPageLinks' => 10, // Default: 10
+        'getVars' => array(), // Default: empty array
+        'baseUrl' => '', // Default: empty
+        'listMarkup' => "<ul class='pagination'>{out}</ul>",
+        'itemMarkup' => "<li class='{class}'>{out}</li>",
+        'linkMarkup' => "<a href='{url}'><span>{out}</span></a>",
+        'nextItemLabel' => '→',
+        'previousItemLabel' => '←',
         'separatorItemLabel' => '',
         'separatorItemClass' => '',
-        'nextItemClass'      => 'next',
-        'previousItemClass'  => 'previous',
-        'lastItemClass'      => 'last',
-        'currentItemClass'   => 'active'
+        'nextItemClass' => 'next',
+        'previousItemClass' => 'previous',
+        'lastItemClass' => 'last',
+        'currentItemClass' => 'active'
     );
 
     // merge common defaults from $view->renderPagerDefaults (eg. ready.php)
@@ -266,7 +266,7 @@ $view->addFilter('getlines', function ($data = null, $separator = '=') {
  */
 $view->addFilter('imageattrs', function ($img, $except = null) {
 
-    $alt = 'alt="' . $img->description . '"';
+    $alt = ' alt="' . $img->description . '" ';
 
     if (!is_null($except)) {
         if (strpos($except, '-alt') !== false) {
@@ -275,6 +275,34 @@ $view->addFilter('imageattrs', function ($img, $except = null) {
     }
 
     return 'width="' . $img->width . '" height="' . $img->height . '"' . $alt;
+});
+
+
+/**
+ * List array items with a separator
+ * Similar to the built-in "implode" filter but accepts string too
+ * {array($page->title, ($page->modified|date:'%Y'), $page->name)|list:'|','span'|noescape}
+ *
+ */
+$view->addFilter('list', function ($data, $separator = '', $tag = null) {
+
+    $out = $startTag = $endTag = '';
+
+    if (!is_null($tag)) {
+        $startTag = '<' . $tag . '>';
+        $endTag = '</' . $tag . '>';
+    }
+
+    $data = is_array($data) ? $data : array($data);
+    $data = array_filter($data);    // skip empty items
+
+    foreach ($data as $item) {
+        $out .= $startTag . trim($item) . $endTag . $separator;
+    }
+
+    $out = rtrim($out, $separator);     // remove last separator
+
+    return $out;
 });
 
 
@@ -351,12 +379,12 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $view = $this->wire($this->api_var);
 
     $defaults = array(
-        'width'    => 560,
-        'height'   => 315,
-        'upscale'  => true,
-        'attr'     => '',
+        'width' => 560,
+        'height' => 315,
+        'upscale' => true,
+        'attr' => '',
         'wrapAttr' => 'class="embed-wrap"',
-        'srcAttr'  => 'src'
+        'srcAttr' => 'src'
     );
 
     $defaults = array_merge($defaults, isset($view->embediframeDefaults) ? $view->embediframeDefaults : array());
@@ -645,16 +673,6 @@ $view->addFilter('sanitizer', function () use ($view) {
 // truncate html
 $view->addFilter('truncatehtml', function () {
     return call_user_func_array(array('ProcessWire\Text', 'truncateHtmlText'), func_get_args());
-});
-
-
-/**
- * List array items with a separator
- * Same as built-in implode filter but accepts strings too
- */
-$view->addFilter('list', function ($items, $separator = ' ') {
-    // array_filter removes empty items
-    return !is_array($items) ? $items : implode($separator, array_filter($items));
 });
 
 

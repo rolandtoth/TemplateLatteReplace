@@ -1,6 +1,11 @@
 #Changelog
 
 
+### 0.4.2 (2017-04-12)
+
+- new 'list' filter
+
+
 ### 0.4.1 (2017-03-28)
 
 - 'imageattrs' and 'getlines' filters
