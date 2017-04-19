@@ -1,9 +1,17 @@
 #Changelog
 
 
+### 0.4.3 (2017-04-19)
+
+- new module option: disable 'noescape' filter
+- '_t' global function: use $config->default_translations array as a translation fallback
+
+
+
 ### 0.4.2 (2017-04-12)
 
 - new 'list' filter
+
 
 
 ### 0.4.1 (2017-03-28)

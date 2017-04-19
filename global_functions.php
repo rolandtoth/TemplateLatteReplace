@@ -15,12 +15,18 @@ function _t($args = null) {
 
     $text = isset($args[0]) ? $args[0] : "";
 
-    if ($text == "")
-        return "";
+    if ($text == "") return "";
 
-    $textdomain = isset($args[2]) ? $args[2] : ProcessWire\wire('config')->defaultTextdomain;
+    $textdomain = isset($args[2]) ? $args[2] : \ProcessWire\wire('config')->defaultTextdomain;
 
-    $string = isset($args[1]) ? ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
+    $string = isset($args[1]) ? \ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
+
+    // if there's no translation, check if $config->default_translations array exists
+    $default_translations = \ProcessWire\wire('config')->default_translations;
+
+    if ($string == $text && is_array($default_translations) && isset($default_translations[$string])) {
+        $string = $default_translations[$string];
+    }
 
     return html_entity_decode(htmlspecialchars_decode($string, ENT_QUOTES | ENT_HTML5));
 }
@@ -38,9 +44,9 @@ function _p($args = null) {
         $args = func_get_args();
     }
 
-    $singular     = isset($args[0]) ? $args[0] : "";
-    $plural       = isset($args[1]) ? $args[1] : "";
-    $count        = isset($args[2]) ? $args[2] : 1;
+    $singular = isset($args[0]) ? $args[0] : "";
+    $plural = isset($args[1]) ? $args[1] : "";
+    $count = isset($args[2]) ? $args[2] : 1;
     $replacements = isset($args[3]) ? $args[3] : array();
 
     // if 4 parameters are passed then add the fourth as the replacement array

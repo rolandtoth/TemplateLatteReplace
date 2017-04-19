@@ -32,15 +32,15 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public static function getModuleInfo() {
         return array(
-            'title'    => 'Template Latte Replace',
-            'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
-            'href'     => '',
-            'author'   => 'Roland Toth',
-            'version'  => 42,
+            'title' => 'Template Latte Replace',
+            'summary' => __('Latte template engine support for ProcessWire.', __FILE__),
+            'href' => '',
+            'author' => 'Roland Toth',
+            'version' => 43,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
-            'icon'     => 'code'
+            'icon' => 'code'
         );
     }
 
@@ -51,17 +51,18 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     static public function getDefaultData() {
 
         return array(
-            "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
-            "api_var"           => 'view',
-            "viewsDir"          => '',
+            "cacheDir" => str_replace('ProcessWire\\', '', __CLASS__),
+            "api_var" => 'view',
+            "viewsDir" => '',
             "defaultTextdomain" => '/site/templates/_strings.php',
             "defaultLayoutFile" => '@layout.latte',
-            "options"           => array(
+            "options" => array(
                 'extraMacros',
                 'extraFilters'
                 //'useLatteExtension',
+                //'disableNoescape',
             ),
-            "fuels"             => array(
+            "fuels" => array(
                 'config',
                 'fields',
                 'input',
@@ -152,14 +153,10 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $templateFile = $event->object;
 
-        if ($templateFile->page->template == 'admin') {
-            return;
-        }
+        if ($templateFile->page->template == 'admin') return;
 
         // no need to process HannaCode (type PHP causes error)
-        if (strpos($templateFile->filename, 'HannaCode') !== false) {
-            return;
-        }
+        if (strpos($templateFile->filename, 'HannaCode') !== false) return;
 
         if ($templateFile->filename != "") {
             // this is a page render, go ahead and process the output
@@ -177,7 +174,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 //            }
         }
 
-        $event->return = $markup;
+//        $event->return = $markup;
 
         // fix html entity encoder issues
 //        $event->return = htmlspecialchars_decode($markup);
@@ -187,6 +184,12 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         // fix html entity encoder + no need to ue "noescape" filter
 //        $event->return = htmlspecialchars_decode(html_entity_decode($markup));
+
+        if (in_array('disableNoescape', $this->options)) {
+            $markup = htmlspecialchars_decode(html_entity_decode($markup));
+        }
+
+        $event->return = $markup;
     }
 
     /**
@@ -354,6 +357,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
         $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
         $f->addOption('useLatteExtension', __('Use `latte` extension - WARNING: rename "admin.php" to "admin.latte" manually!', __FILE__));
+        $f->addOption('disableNoescape', __('Disable `noescape` filter', __FILE__));
 
         if (isset($data[$fieldName])) {
             $f->attr('value', $data[$fieldName]);

@@ -221,16 +221,18 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
  * Empty lines and lines starting with "//" are skipped.
  *
  * @param string $data Field value
+ * @param string $filter comma separated values of keys to get
  * @param string $separator separator for associative array
  *
  * @return array
  */
-$view->addFilter('getlines', function ($data = null, $separator = '=') {
+$view->addFilter('getlines', function ($data = null, $filter = '', $separator = '=') {
 
     if (is_null($data)) return false;
 
     $out = array();
     $comment_identifier = '//';
+    $need_filter = false;
 
     $lines = trim($data);
     $lines = explode("\n", $lines);
@@ -238,6 +240,14 @@ $view->addFilter('getlines', function ($data = null, $separator = '=') {
     $lines = array_filter($lines, 'trim');  // remove empty lines
 
     $lines = array_values($lines);  // rearrange array keys to avoid gap
+
+    if (strlen($filter)) {
+        $need_filter = true;
+
+        $filter = explode(',', $filter);
+        $filter = array_map('trim', $filter); //trim whitespace
+        $filter = array_filter($filter, 'trim');  // remove empty lines
+    }
 
     for ($i = 0; $i < count($lines); $i++) {
         $line = $lines[$i];
@@ -249,10 +259,22 @@ $view->addFilter('getlines', function ($data = null, $separator = '=') {
             $arr = explode($separator, $line, 2);
             $arr = array_map('trim', $arr);
             $key = $arr[0];
+            if ($need_filter && !in_array($key, (array)$filter)) continue;
             $line = $arr[1];
         }
 
         $out[$key] = $line;
+    }
+
+
+    $array_items = count($out);
+    if ($array_items === 1) {
+        // return only the value if the array has only 1 item
+        // enables inline usage without foreach
+        $out = reset($out);
+    } elseif ($array_items === 0) {
+        // empty array (possibly nonexisting filter)
+        $lines = '';
     }
 
     return !empty($out) ? $out : $lines;
@@ -315,7 +337,7 @@ $view->addFilter('list', function ($data, $separator = '', $tag = null) {
  * <img src="{$page->images->first()->width(900)|lazy:3|noescape}" alt="" class="lazyload" />
  *
  */
-$view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img') {
+$view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img', $crop_preset = null) {
 
     $divisor = is_null($divisor) ? 4 : (int)$divisor;
 
