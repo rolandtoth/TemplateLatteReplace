@@ -17,15 +17,22 @@ function _t($args = null) {
 
     if ($text == "") return "";
 
+    $context = isset($args[1]) ? $args[1] : false;
     $textdomain = isset($args[2]) ? $args[2] : \ProcessWire\wire('config')->defaultTextdomain;
 
-    $string = isset($args[1]) ? \ProcessWire\_x($text, $args[1], $textdomain) : ProcessWire\__($text, $textdomain);
+    $string = isset($context) ? \ProcessWire\_x($text, $context, $textdomain) : ProcessWire\__($text, $textdomain);
 
     // if there's no translation, check if $config->default_translations array exists
     $default_translations = \ProcessWire\wire('config')->default_translations;
 
-    if ($string == $text && is_array($default_translations) && isset($default_translations[$string])) {
-        $string = $default_translations[$string];
+    if ($string == $text && is_array($default_translations)) {
+        if ($context) {
+            if (isset($default_translations[$context]) && isset($default_translations[$context][$string])) {
+                $string = $default_translations[$context][$string];
+            }
+        } else if (isset($default_translations[$string])) {
+            $string = $default_translations[$string];
+        }
     }
 
     return html_entity_decode(htmlspecialchars_decode($string, ENT_QUOTES | ENT_HTML5));
