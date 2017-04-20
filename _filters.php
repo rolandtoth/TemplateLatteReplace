@@ -26,6 +26,7 @@ $view->addFilter('bodyclass', function ($p) {
     if (!empty($id)) {
 
         $class = array();
+        $view = $this->wire($this->api_var);
 
         $class[] = ($id == 1) ? "home" : "page-" . $id;
 
@@ -36,10 +37,22 @@ $view->addFilter('bodyclass', function ($p) {
             if ($pageNum > 1) $class[] = "pagenum-" . $pageNum;
         }
 
-        if ($this->wire('user')->language)
+        if ($this->wire('user')->language) {
             $class[] = "lang-" . $this->wire('user')->language->name;
+        }
 
         $class[] = "template-" . $p->template->name;
+
+        if($p->body_class) {
+            $custom_classes = (array) $p->body_class;
+            $class = array_merge($class, $custom_classes);
+        }
+
+        // if there's a view file, add its file name
+        if(isset($view->viewFile)) {
+            $viewFile = explode('/', $view->viewFile);
+            $class[] = 'v-' . $this->wire('sanitizer')->pageName(end($viewFile));
+        }
 
         $class = implode(" ", $class);
     }
