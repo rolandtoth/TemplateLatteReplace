@@ -6,6 +6,7 @@
 - new 'getembedurl' to retrieve embed url from video urls (for Youtube and Vimeo)
 - new 'append' and 'prepend' filters to easily append/prepend data
 - 'embediframe' filter: added 'urlParams' parameter
+- added 'viewFile' to bodyclass filter (translates to 'v-viewfile_name')
 
 
 
