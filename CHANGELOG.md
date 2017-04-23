@@ -1,6 +1,14 @@
 #Changelog
 
 
+### 0.4.4 (2017-04-23)
+
+- new 'getembedurl' to retrieve embed url from video urls (for Youtube and Vimeo)
+- new 'append' and 'prepend' filters to easily append/prepend data
+- 'embediframe' filter: added 'urlParams' parameter
+
+
+
 ### 0.4.3 (2017-04-19)
 
 - new module option: disable 'noescape' filter

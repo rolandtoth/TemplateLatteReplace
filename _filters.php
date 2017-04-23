@@ -43,13 +43,13 @@ $view->addFilter('bodyclass', function ($p) {
 
         $class[] = "template-" . $p->template->name;
 
-        if($p->body_class) {
-            $custom_classes = (array) $p->body_class;
+        if ($p->body_class) {
+            $custom_classes = (array)$p->body_class;
             $class = array_merge($class, $custom_classes);
         }
 
         // if there's a view file, add its file name
-        if(isset($view->viewFile)) {
+        if (isset($view->viewFile)) {
             $viewFile = explode('/', $view->viewFile);
             $class[] = 'v-' . $this->wire('sanitizer')->pageName(end($viewFile));
         }
@@ -103,20 +103,20 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
     $view = $this->wire($this->api_var);
 
     $paginationSettings = array(
-        'numPageLinks' => 10, // Default: 10
-        'getVars' => array(), // Default: empty array
-        'baseUrl' => '', // Default: empty
-        'listMarkup' => "<ul class='pagination'>{out}</ul>",
-        'itemMarkup' => "<li class='{class}'>{out}</li>",
-        'linkMarkup' => "<a href='{url}'><span>{out}</span></a>",
-        'nextItemLabel' => '→',
-        'previousItemLabel' => '←',
+        'numPageLinks'       => 10, // Default: 10
+        'getVars'            => array(), // Default: empty array
+        'baseUrl'            => '', // Default: empty
+        'listMarkup'         => "<ul class='pagination'>{out}</ul>",
+        'itemMarkup'         => "<li class='{class}'>{out}</li>",
+        'linkMarkup'         => "<a href='{url}'><span>{out}</span></a>",
+        'nextItemLabel'      => '→',
+        'previousItemLabel'  => '←',
         'separatorItemLabel' => '',
         'separatorItemClass' => '',
-        'nextItemClass' => 'next',
-        'previousItemClass' => 'previous',
-        'lastItemClass' => 'last',
-        'currentItemClass' => 'active'
+        'nextItemClass'      => 'next',
+        'previousItemClass'  => 'previous',
+        'lastItemClass'      => 'last',
+        'currentItemClass'   => 'active'
     );
 
     // merge common defaults from $view->renderPagerDefaults (eg. ready.php)
@@ -233,8 +233,8 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
  * Explode lines of a textarea field into an array.
  * Empty lines and lines starting with "//" are skipped.
  *
- * @param string $data Field value
- * @param string $filter comma separated values of keys to get
+ * @param string $data      Field value
+ * @param string $filter    comma separated values of keys to get
  * @param string $separator separator for associative array
  *
  * @return array
@@ -414,12 +414,13 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $view = $this->wire($this->api_var);
 
     $defaults = array(
-        'width' => 560,
-        'height' => 315,
-        'upscale' => true,
-        'attr' => '',
-        'wrapAttr' => 'class="embed-wrap"',
-        'srcAttr' => 'src'
+        'width'     => 560,
+        'height'    => 315,
+        'upscale'   => true,
+        'attr'      => '',
+        'wrapAttr'  => 'class="embed-wrap"',
+        'srcAttr'   => 'src',
+        'urlParams' => ''
     );
 
     $defaults = array_merge($defaults, isset($view->embediframeDefaults) ? $view->embediframeDefaults : array());
@@ -436,7 +437,7 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $ratio = round($height / $width * 100, 2);
 
     return <<< HTML
-    <div $wrapAttr><div style="padding-bottom:$ratio%"><iframe width="$width" height="$height" $srcAttr="$url" $attr></iframe></div></div>
+    <div $wrapAttr><div style="padding-bottom:$ratio%;"><iframe width="$width" height="$height" $srcAttr="$url$urlParams" $attr></iframe></div></div>
 HTML;
 });
 
@@ -448,6 +449,43 @@ $view->addFilter('getparent', function ($selector = null) {
         return false;
 
     return ($selector instanceof PageArray) ? $selector->first()->parent() : $this->wire('pages')->get($selector)->parent();
+});
+
+// append data
+$view->addFilter('append', function ($data = null, $newdata = null) {
+
+    if (is_null($data) || is_null($newdata)) return false;
+
+    if (is_array($data)) {
+        if (is_array($newdata)) {
+            $data = array_merge($data, $newdata);
+        } else {
+            $data[] = $newdata;
+        }
+    } else {
+        $data = $data . $newdata;
+    }
+
+    return $data;
+});
+
+
+// prepend data
+$view->addFilter('prepend', function ($data = null, $newdata = null) {
+
+    if (is_null($data) || is_null($newdata)) return false;
+
+    if (is_array($data)) {
+        if (is_array($newdata)) {
+            $data = array_merge($newdata, $data);
+        } else {
+            array_unshift($data, $newdata);
+        }
+    } else {
+        $data = $newdata . $data;
+    }
+
+    return $data;
 });
 
 
@@ -740,6 +778,75 @@ $view->addFilter('surround', function ($data = null, $startTag = null) {
 
     return $startTag . $markup . $endTag;
 });
+
+
+/**
+ * Get embed URL from video url (supported: Youtube and Vimeo).
+ *
+ * @param string $url
+ *
+ * @return string Youtube or Vimeo embed url or FALSE if url is not supported.
+ */
+$view->addFilter('getembedurl', function ($url) {
+
+    $embed_url = false;
+    $youtube_embed_base = 'https://www.youtube.com/embed/';
+    $vimeo_embed_base = 'https://player.vimeo.com/video/';
+
+    if (strpos($url, 'youtube') > 0) {
+        $embed_url = $youtube_embed_base . get_youtube_id_from_url($url);
+
+    } elseif (strpos($url, 'vimeo') > 0) {
+        $embed_url = $vimeo_embed_base . get_vimeo_id_form_url($url);
+    }
+
+    return $embed_url;
+});
+
+
+/**
+ * Get Vimeo video ID from URL.
+ *
+ * @param string $url
+ *
+ * @return string Youtube video id or FALSE if none found.
+ */
+function get_vimeo_id_form_url($url) {
+    return substr(parse_url($url, PHP_URL_PATH), 1);
+}
+
+
+/**
+ * Get Youtube video ID from URL.
+ *
+ * @param string $url
+ *
+ * @return string Youtube video id or FALSE if none found.
+ */
+function get_youtube_id_from_url($url) {
+
+    $pattern =
+        '%^# Match any youtube URL
+        (?:https?://)?  # Optional scheme. Either http or https
+        (?:www\.)?      # Optional www subdomain
+        (?:             # Group host alternatives
+          youtu\.be/    # Either youtu.be,
+        | youtube\.com  # or youtube.com
+          (?:           # Group path alternatives
+            /embed/     # Either /embed/
+          | /v/         # or /v/
+          | /watch\?v=  # or /watch\?v=
+          )             # End path alternatives.
+        )               # End host alternatives.
+        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
+        $%x';
+
+    $result = preg_match($pattern, $url, $matches);
+
+    if ($result) return $matches[1];
+
+    return false;
+}
 
 
 /**
