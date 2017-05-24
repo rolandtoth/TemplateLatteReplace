@@ -279,8 +279,8 @@ $view->addFilter('getlines', function ($data = null, $filter = '', $separator = 
         $out[$key] = $line;
     }
 
-
     $array_items = count($out);
+
     if ($array_items === 1) {
         // return only the value if the array has only 1 item
         // enables inline usage without foreach
@@ -689,6 +689,7 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
     }
 
     $result = (isset($p->mv) && !empty($p->mv->$key->value)) ? $p->mv->$key->value : null;
+
 
     // try default language if value not found
     if ($isMultiLang && is_null($result) && $recursive) {

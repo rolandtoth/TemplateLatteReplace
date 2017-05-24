@@ -1,4 +1,10 @@
-#Changelog
+# Changelog
+
+
+### 0.4.5 (2017-05-24)
+
+- add stripslashes when 'noescape' is disabled in module settings
+
 
 
 ### 0.4.4 (2017-04-23)

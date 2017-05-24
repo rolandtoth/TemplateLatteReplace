@@ -36,7 +36,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary' => __('Latte template engine support for ProcessWire.', __FILE__),
             'href' => '',
             'author' => 'Roland Toth',
-            'version' => 44,
+            'version' => 45,
             'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -186,7 +186,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 //        $event->return = htmlspecialchars_decode(html_entity_decode($markup));
 
         if (in_array('disableNoescape', $this->options)) {
-            $markup = htmlspecialchars_decode(html_entity_decode($markup));
+            $markup = stripslashes(htmlspecialchars_decode(html_entity_decode($markup)));
         }
 
         $event->return = $markup;
