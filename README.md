@@ -8,4 +8,4 @@ Template Latte Replace
 
 - [Documentation](https://github.com/rolandtoth/TemplateLatteReplace/wiki)
 - [ProcessWire forum topic](https://processwire.com/talk/topic/13168-module-template-latte-replace/)
-- [Modules Directory](http://modules.processwire.com/modules/template-latte-replace/)
+- [ProcessWire Modules Directory](http://modules.processwire.com/modules/template-latte-replace/)
