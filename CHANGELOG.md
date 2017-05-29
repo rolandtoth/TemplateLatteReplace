@@ -1,6 +1,12 @@
 # Changelog
 
 
+### 0.4.6 (2017-05-29)
+
+- added ignoredTemplates module setting (thanks to mke)
+
+
+
 ### 0.4.5 (2017-05-24)
 
 - add stripslashes when 'noescape' is disabled in module settings
