@@ -1,6 +1,13 @@
 # Changelog
 
 
+### 0.4.7 (2017-06-14)
+
+- 'getlines' filter: added fallback to default language
+- 'getlines' always return array (even if there's only one matching item)
+
+
+
 ### 0.4.6 (2017-05-29)
 
 - added ignoredTemplates module setting (thanks to mke)

@@ -30,11 +30,14 @@ $view->addFilter('bodyclass', function ($p) {
 
         $class[] = ($id == 1) ? "home" : "page-" . $id;
 
-        if (!in_array($p->parent->id, array(0, 1)))
+        if (!in_array($p->parent->id, array(0, 1))) {
             $class[] = "parent-" . $p->parent->id;
+        }
 
         if ($pageNum = wire('input')->pageNum) {
-            if ($pageNum > 1) $class[] = "pagenum-" . $pageNum;
+            if ($pageNum > 1) {
+                $class[] = "pagenum-" . $pageNum;
+            }
         }
 
         if ($this->wire('user')->language) {
@@ -64,8 +67,9 @@ $view->addFilter('bodyclass', function ($p) {
 // returns a selector built from IDs (eg. "id=1045|1033|1020")
 $view->addFilter('getselector', function ($pArr = null) {
 
-    if (is_null($pArr) || !($pArr instanceof PageArray))
+    if (is_null($pArr) || !($pArr instanceof PageArray)) {
         return false;
+    }
 
     return 'id=' . $pArr->id('|');
 });
@@ -73,8 +77,9 @@ $view->addFilter('getselector', function ($pArr = null) {
 
 $view->addFilter('getpage', function ($selector = null) {
 
-    if (is_null($selector))
+    if (is_null($selector)) {
         return false;
+    }
 
     return $this->wire('pages')->get($selector);
 });
@@ -82,14 +87,17 @@ $view->addFilter('getpage', function ($selector = null) {
 
 $view->addFilter('getpages', function ($selector = null, $extraSelector = null) {
 
-    if (is_null($selector))
+    if (is_null($selector)) {
         return false;
+    }
 
-    if ($selector instanceof PageArray)
+    if ($selector instanceof PageArray) {
         return $selector->filter($extraSelector);
+    }
 
-    if (!is_null($extraSelector))
+    if (!is_null($extraSelector)) {
         $selector .= ',' . $extraSelector;
+    }
 
     return $this->wire('pages')->find($selector);
 });
@@ -97,8 +105,9 @@ $view->addFilter('getpages', function ($selector = null, $extraSelector = null) 
 
 $view->addFilter('renderpager', function ($pArr = null, $options = null) {
 
-    if (is_null($pArr) || !($pArr instanceof PageArray))
+    if (is_null($pArr) || !($pArr instanceof PageArray)) {
         return false;
+    }
 
     $view = $this->wire($this->api_var);
 
@@ -120,7 +129,8 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
     );
 
     // merge common defaults from $view->renderPagerDefaults (eg. ready.php)
-    $paginationSettings = array_merge($paginationSettings, isset($view->renderPagerDefaults) ? $view->renderPagerDefaults : array());
+    $paginationSettings = array_merge($paginationSettings,
+        isset($view->renderPagerDefaults) ? $view->renderPagerDefaults : array());
 
     if (!is_null($options)) {
         if (is_array($options)) {   // merge user options
@@ -142,11 +152,13 @@ $view->addFilter('pager', function () use ($view) {
 
 $view->addFilter('breadcrumb', function ($p = null, $args = null) {
 
-    if (is_null($p))
+    if (is_null($p)) {
         return false;
+    }
 
-    if (!is_array($args))
+    if (!is_array($args)) {
         $args = array($args);
+    }
 
     $markup = '';
 
@@ -161,27 +173,33 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
     $id = isset($args['id']) ? $args['id'] : '';
     $addAttributes = isset($args['addAttributes']) ? true : false;
 
-    if (strlen($id))
+    if (strlen($id)) {
         $id = ' id="' . $id . '"';
+    }
 
-    if (strlen($class))
+    if (strlen($class)) {
         $class = ' class="' . $class . '"';
+    }
 
-    if ($root instanceof Page)
+    if ($root instanceof Page) {
         $root = $root->id;
+    }
 
     // return if current page is not below root
-    if ($this->wire('pages')->get($root)->find($p->id)->count() == 0)
+    if ($this->wire('pages')->get($root)->find($p->id)->count() == 0) {
         return false;
+    }
 
-    if ($addHome)
+    if ($addHome) {
         $parents = $this->wire('pages')->get($root)->and($p->parentsUntil($root));
-    else
+    } else {
         $parents = $p->parentsUntil($root);
+    }
 
     // do not attempt to display breadcrumb if there are no items
-    if ($parents->count() == 0)
+    if ($parents->count() == 0) {
         return false;
+    }
 
     $getAttributes = function ($str) use ($addAttributes) {
         if ($addAttributes) {
@@ -207,25 +225,42 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
 // use getParent if PageArray is passed
 $view->addFilter('get', function ($selector = null, $field = 'title') {
 
-    if (is_null($selector))
+    if (is_null($selector)) {
         return false;
+    }
 
     // needed for $pageArray|getParent|get to work
-    if ($selector instanceOf Page)
+    if ($selector instanceOf Page) {
         $selector = $selector->id;
+    }
 
     $page = $this->wire('pages')->get($selector);
 
-    if (!$page->id)
+    if (!$page->id) {
         return false;
+    }
 
-    if ($page->$field instanceof Pageimages)
-//    if (is_array($page->$field))
+    if ($page->$field instanceof Pageimages) //    if (is_array($page->$field))
+    {
         $value = $page->$field->first();
-    else
+    } else {
         $value = $page->$field;
+    }
 
     return $value;
+});
+
+
+
+// get first item of an array
+$view->addFilter('first', function ($arr = null) {
+    return is_array($arr) ? reset($arr) : $arr;
+});
+
+
+// get last item of an array
+$view->addFilter('last', function ($arr = null) {
+    return is_array($arr) ? end($arr) : $arr;
 });
 
 
@@ -239,40 +274,70 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
  *
  * @return array
  */
-$view->addFilter('getlines', function ($data = null, $filter = '', $separator = '=') {
+$view->addFilter('getlines', function ($source = null, $filter = '', $separator = '=', $language = null) use ($view) {
 
-    if (is_null($data)) return false;
+    if (is_null($source)) {
+        return;
+    }
+
+    $isMultiLang = is_object(wire('languages'));
+    $originalLang = 'default';
+    $user = wire('user');
+
+    if ($isMultiLang) {
+        $originalLang = $user->language->name;
+        if (!is_null($language)) {
+            $user->language = $language;
+        }
+    }
+
+    // source data can be set as [$pageID, $fieldName] to allow fallback to default language
+    if (is_array($source)) {
+        $pid = (int)$source[0];
+        $field = $source[1];
+        $data = \ProcessWire\wire('pages')->get($pid)->{$field};
+    } else {
+        $data = $source;
+    }
 
     $out = array();
     $comment_identifier = '//';
-    $need_filter = false;
 
     $lines = trim($data);
     $lines = explode("\n", $lines);
+
+    if (!is_array($lines)) {
+        $lines = array($lines);
+    }
+
     $lines = array_map('trim', $lines); //trim whitespace
     $lines = array_filter($lines, 'trim');  // remove empty lines
 
     $lines = array_values($lines);  // rearrange array keys to avoid gap
 
-    if (strlen($filter)) {
-        $need_filter = true;
 
-        $filter = explode(',', $filter);
-        $filter = array_map('trim', $filter); //trim whitespace
-        $filter = array_filter($filter, 'trim');  // remove empty lines
+    if (strlen($filter)) {
+        $filter_data = explode(',', $filter);
+        $filter_data = array_map('trim', $filter_data); //trim whitespace
+        $filter_data = array_filter($filter_data, 'trim');  // remove empty lines
     }
 
     for ($i = 0; $i < count($lines); $i++) {
         $line = $lines[$i];
         $key = $i;
 
-        if (strpos(trim($line), $comment_identifier) === 0) continue;   // skip items commented out
+        // skip items commented out
+        if (strpos(trim($line), $comment_identifier) === 0) {
+            continue;
+        }
 
         if (strpos($line, $separator) !== false) {
             $arr = explode($separator, $line, 2);
             $arr = array_map('trim', $arr);
             $key = $arr[0];
-            if ($need_filter && !in_array($key, (array)$filter)) continue;
+            if (isset($filter_data) && !in_array($key, (array)$filter_data)) {
+                continue;
+            }
             $line = $arr[1];
         }
 
@@ -284,10 +349,21 @@ $view->addFilter('getlines', function ($data = null, $filter = '', $separator = 
     if ($array_items === 1) {
         // return only the value if the array has only 1 item
         // enables inline usage without foreach
-        $out = reset($out);
+//        $out = reset($out);
+
     } elseif ($array_items === 0) {
-        // empty array (possibly nonexisting filter)
-        $lines = '';
+        // empty array (possibly nonexisting filter or no matching line in current language)
+        // try default language
+        if ($isMultiLang && $language !== 'default') {
+            return $view->invokeFilter('getlines', array($source, $filter, $separator, 'default'));
+        } else {
+//            $lines = '';
+            $lines = array();
+        }
+    }
+
+    if ($isMultiLang) {
+        $user->language = $originalLang;
     }
 
     return !empty($out) ? $out : $lines;
@@ -354,7 +430,9 @@ $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img', 
 
     $divisor = is_null($divisor) ? 4 : (int)$divisor;
 
-    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1) return false;
+    if (is_null($img) || !($img instanceof Pageimage) || $divisor <= 1) {
+        return false;
+    }
 
     $markup = '';
 
@@ -363,8 +441,10 @@ $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img', 
 
     if ($type === 'img') {
         $markup = $imgSmall->url . '" data-src="' . $img->url;
-    } else if ($type === 'bg') {
-        $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
+    } else {
+        if ($type === 'bg') {
+            $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
+        }
     }
 
     return $markup;
@@ -382,7 +462,9 @@ $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img', 
  * */
 $view->addFilter('bgset', function () use ($view) {
     $args = func_get_args();
-    if (!isset($args[1])) $args[1] = null;   // ensure there's a second parameter
+    if (!isset($args[1])) {
+        $args[1] = null;
+    }   // ensure there's a second parameter
     $args[] = 'bg';
 
     return $view->invokeFilter('lazy', $args);
@@ -392,8 +474,9 @@ $view->addFilter('bgset', function () use ($view) {
 // count PageArray
 $view->addFilter('count', function ($selector = null) {
 
-    if (is_null($selector))
+    if (is_null($selector)) {
         return false;
+    }
 
     return ($selector instanceof PageArray) ? $selector->count() : $this->wire('pages')->find($selector)->count();
 });
@@ -409,7 +492,9 @@ $view->addFilter('count', function ($selector = null) {
  */
 $view->addFilter('embediframe', function ($url, $args = null) {
 
-    if (strlen($url) == 0) return false;
+    if (strlen($url) == 0) {
+        return false;
+    }
 
     $view = $this->wire($this->api_var);
 
@@ -432,7 +517,9 @@ $view->addFilter('embediframe', function ($url, $args = null) {
     $width = !is_integer($width) ? 560 : $width;
     $height = !is_integer($height) ? 315 : $height;
 
-    if ($upscale === false) $wrapAttr .= ' style="max-width:' . $width . 'px;" ';
+    if ($upscale === false) {
+        $wrapAttr .= ' style="max-width:' . $width . 'px;" ';
+    }
 
     $ratio = round($height / $width * 100, 2);
 
@@ -445,8 +532,9 @@ HTML;
 // get parent
 $view->addFilter('getparent', function ($selector = null) {
 
-    if (is_null($selector))
+    if (is_null($selector)) {
         return false;
+    }
 
     return ($selector instanceof PageArray) ? $selector->first()->parent() : $this->wire('pages')->get($selector)->parent();
 });
@@ -454,7 +542,9 @@ $view->addFilter('getparent', function ($selector = null) {
 // append data
 $view->addFilter('append', function ($data = null, $newdata = null) {
 
-    if (is_null($data) || is_null($newdata)) return false;
+    if (is_null($data) || is_null($newdata)) {
+        return false;
+    }
 
     if (is_array($data)) {
         if (is_array($newdata)) {
@@ -473,7 +563,9 @@ $view->addFilter('append', function ($data = null, $newdata = null) {
 // prepend data
 $view->addFilter('prepend', function ($data = null, $newdata = null) {
 
-    if (is_null($data) || is_null($newdata)) return false;
+    if (is_null($data) || is_null($newdata)) {
+        return false;
+    }
 
     if (is_array($data)) {
         if (is_array($newdata)) {
@@ -492,8 +584,9 @@ $view->addFilter('prepend', function ($data = null, $newdata = null) {
 // inline background-image
 $view->addFilter('bgimage', function ($img = null) {
 
-    if (is_null($img))
+    if (is_null($img)) {
         return false;
+    }
 
     return 'style="background-image: url(\'' . $img->url . '\')"';
 });
@@ -501,17 +594,23 @@ $view->addFilter('bgimage', function ($img = null) {
 
 // barDump (needs TracyDebugger module)
 $view->addFilter('bd', function ($data = null) {
-    if (!is_null($data) && function_exists('bd')) bd($data);
+    if (!is_null($data) && function_exists('bd')) {
+        bd($data);
+    }
 });
 
 // barDump long (needs TracyDebugger module)
 $view->addFilter('bdl', function ($data = null) {
-    if (!is_null($data) && function_exists('bdl')) bdl($data);
+    if (!is_null($data) && function_exists('bdl')) {
+        bdl($data);
+    }
 });
 
 // dump (needs TracyDebugger module)
 $view->addFilter('d', function ($data = null) {
-    if (!is_null($data) && function_exists('d')) d($data);
+    if (!is_null($data) && function_exists('d')) {
+        d($data);
+    }
 });
 
 
@@ -526,8 +625,9 @@ $view->addFilter('consolelog', function ($data = null) {
 
     if (!is_null($data)) {
 
-        if (is_array($data))
+        if (is_array($data)) {
             $data = implode(',', $data);
+        }
 
         echo '<script>console.log("' . $data . '");</script>';
     }
@@ -606,18 +706,22 @@ $view->addFilter('protectemail', function ($address, $encode = 'javascript', $te
 
         return '<a href="' . $mailto . $address_encode . '"' . $_extra . '>' . $text_encode . '</a>';
 
-    } else if ($encode == 'drupal') {
+    } else {
+        if ($encode == 'drupal') {
 
-        $address = str_replace('@', '[at]', $address);
-        $_text = $text == null ? $address : $_text;
+            $address = str_replace('@', '[at]', $address);
+            $_text = $text == null ? $address : $_text;
 
-        return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+            return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
 
-    } else if ($encode == 'texy') {
-        $address = str_replace('@', '<!-- ANTISPAM -->&#64;<!-- /ANTISPAM -->', $address);
-        $_text = $text == null ? $address : $_text;
+        } else {
+            if ($encode == 'texy') {
+                $address = str_replace('@', '<!-- ANTISPAM -->&#64;<!-- /ANTISPAM -->', $address);
+                $_text = $text == null ? $address : $_text;
 
-        return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+                return '<a href="mailto:' . $address . '"' . $_extra . '>' . $_text . '</a>';
+            }
+        }
     }
 
     // no encoding
@@ -635,19 +739,23 @@ $view->addFilter('protectemail', function ($address, $encode = 'javascript', $te
  */
 $view->addFilter('niceurl', function ($url = null, $remove = 'httpwww/') {
 
-    if (is_null($url))
+    if (is_null($url)) {
         return false;
+    }
 
     $url = trim($url);
 
-    if (strpos($remove, 'www') !== false)
+    if (strpos($remove, 'www') !== false) {
         $url = str_replace('www.', '', $url);
+    }
 
-    if (strpos($remove, 'http') !== false)
+    if (strpos($remove, 'http') !== false) {
         $url = str_replace(array('https://', 'http://'), '', $url);
+    }
 
-    if (strpos($remove, '/') !== false)
+    if (strpos($remove, '/') !== false) {
         $url = rtrim($url, '/');
+    }
 
     return $url;
 });
@@ -718,8 +826,9 @@ $view->addFilter('getsetting', function ($args = null) use ($view) {
  */
 $view->addFilter('sanitize', function ($value = null, $fx = null, $options = null) {
 
-    if (is_null($value) || is_null($fx))
+    if (is_null($value) || is_null($fx)) {
         return false;
+    }
 
     if (is_null($options)) {
         $out = wire('sanitizer')->$fx($value);
@@ -759,8 +868,12 @@ $view->addFilter('truncatehtml', function () {
  */
 $view->addFilter('surround', function ($data = null, $startTag = null) {
 
-    if (is_null($data) || is_null($startTag)) return false;
-    if (!is_array($data)) $data = array($data);
+    if (is_null($data) || is_null($startTag)) {
+        return false;
+    }
+    if (!is_array($data)) {
+        $data = array($data);
+    }
 
     // strip start and end angle brackets
     $startTag = trim($startTag, '<>');
@@ -812,7 +925,8 @@ $view->addFilter('getembedurl', function ($url) {
  *
  * @return string Youtube video id or FALSE if none found.
  */
-function get_vimeo_id_form_url($url) {
+function get_vimeo_id_form_url($url)
+{
     return substr(parse_url($url, PHP_URL_PATH), 1);
 }
 
@@ -824,7 +938,8 @@ function get_vimeo_id_form_url($url) {
  *
  * @return string Youtube video id or FALSE if none found.
  */
-function get_youtube_id_from_url($url) {
+function get_youtube_id_from_url($url)
+{
 
     $pattern =
         '%^# Match any youtube URL
@@ -844,7 +959,9 @@ function get_youtube_id_from_url($url) {
 
     $result = preg_match($pattern, $url, $matches);
 
-    if ($result) return $matches[1];
+    if ($result) {
+        return $matches[1];
+    }
 
     return false;
 }
@@ -860,7 +977,8 @@ function get_youtube_id_from_url($url) {
  *
  *          Text Helpers
  */
-class Text {
+class Text
+{
     /**
      * Truncate HTML text and restore tags
      *
@@ -871,15 +989,26 @@ class Text {
      *
      * @return string
      */
-    public static function truncateHtmlText($string, $limit = null, $break = null, $pad = null) {
-        if ($limit === false) return $string; // false: disable truncate
+    public static function truncateHtmlText($string, $limit = null, $break = null, $pad = null)
+    {
+        if ($limit === false) {
+            return $string;
+        } // false: disable truncate
 
-        if (is_null($limit)) $limit = 120;   // use null to use global defalt limit
-        if (is_null($pad)) $pad = '…';   // use null to use global defalt pad
-        if (is_null($break)) $break = ' ';
+        if (is_null($limit)) {
+            $limit = 120;
+        }   // use null to use global defalt limit
+        if (is_null($pad)) {
+            $pad = '…';
+        }   // use null to use global defalt pad
+        if (is_null($break)) {
+            $break = ' ';
+        }
 
         // pokud je text kratší než je požadováno vrátíme celý $string
-        if (mb_strlen($string, 'UTF-8') <= $limit) return $string;
+        if (mb_strlen($string, 'UTF-8') <= $limit) {
+            return $string;
+        }
         // existuje $break mezi $limit a koncem $string?
         if (false !== ($breakpoint = mb_strpos($string, $break, $limit, "UTF-8"))) {
             if ($breakpoint < mb_strlen($string, 'UTF-8') - 1) {
@@ -897,7 +1026,8 @@ class Text {
      *
      * @return string
      */
-    public static function restoreHtmlTags($string, $pad = " ...") {
+    public static function restoreHtmlTags($string, $pad = " ...")
+    {
         //zkotrolujeme ze jsou vsechny tagy ukoncene (cele) pokud ne tak je odstranime
 //        $prereg = "#((<[a-z1-9]+(?:\n| ).*)((?:>|$))|(<[a-z](?:>|$)))#miU";
         // https://kevin.deldycke.com/2007/03/ultimate-regular-expression-for-html-tag-parsing-with-php/
@@ -941,7 +1071,8 @@ class Text {
      *
      * @return bool
      */
-    public static function endsWith($haystack, $needle) {
+    public static function endsWith($haystack, $needle)
+    {
         $length = strlen($needle);
         if ($length == 0) {
             return true;
