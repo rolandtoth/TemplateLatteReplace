@@ -10,10 +10,31 @@ $view->addFilter('default', function ($str = '', $default = '') {
 });
 
 
-$view->addFilter('activeclass', function ($currentPage, $className = 'active') {
-    $page = $this->wire('page');
+/**
+ * filter t
+ */
+$view->addFilter('replacetokens', function ($data, $tokenStart = "\${", $tokenEnd = "}") {
 
-    return ($page == $currentPage || $page->parentsUntil(1)->has($currentPage)) ? $className : '';
+    $config = \ProcessWire\wire('config');
+
+    if (!isset($config->tokens) || !is_array($config->tokens)) {
+        return $data;
+    }
+
+    $search = array_map(function ($item) use ($tokenStart, $tokenEnd) {
+        return $tokenStart . $item . $tokenEnd;
+    }, array_keys($config->tokens));
+
+    $replace = array_values($config->tokens);
+
+    return str_replace($search, $replace, $data);
+});
+
+
+$view->addFilter('activeclass', function ($currentPage, $className = 'active') {
+    $p = $this->wire('page');
+
+    return ($p == $currentPage || $p->parentsUntil(1)->has($currentPage)) ? $className : '';
 });
 
 
@@ -251,7 +272,6 @@ $view->addFilter('get', function ($selector = null, $field = 'title') {
 });
 
 
-
 // get first item of an array
 $view->addFilter('first', function ($arr = null) {
     return is_array($arr) ? reset($arr) : $arr;
@@ -367,6 +387,13 @@ $view->addFilter('getlines', function ($source = null, $filter = '', $separator 
     }
 
     return !empty($out) ? $out : $lines;
+});
+
+
+$view->addFilter('getline', function () use ($view) {
+    $out = $view->invokeFilter('getlines', func_get_args());
+
+    return reset($out);
 });
 
 
@@ -590,6 +617,37 @@ $view->addFilter('bgimage', function ($img = null) {
 
     return 'style="background-image: url(\'' . $img->url . '\')"';
 });
+
+
+// Create group from PageArray based on $page field.
+// returns an array with key (field value) and items (array of pages)
+$view->addFilter('group', function ($pages, $fieldname = null) {
+
+    if (is_null($fieldname) || !($pages instanceof \ProcessWire\PageArray)) {
+        return $pages;
+    }
+
+    $group = array();
+
+    for ($ii = 0; $ii < $pages->count(); $ii++) {
+        $p = $pages[$ii];
+        $key = \ProcessWire\wire('sanitizer')->pageNameTranslate($p->{$fieldname});
+
+        if ($p->template->hasField($fieldname)) {
+            if (!isset($group[$key])) {
+                $group[$key] = array();
+                $group[$key]['key'] = $key;
+                $group[$key]['title'] = $p->{$fieldname};
+                $group[$key]['items'] = array();
+            }
+            $group[$key]['items'][] = $p;
+        }
+    }
+
+    // return array with numeric keys
+    return array_values($group);
+});
+
 
 
 // barDump (needs TracyDebugger module)
@@ -1034,7 +1092,6 @@ class Text
         $prereg = "/<\/?\w+((\s+(\w|\w[\w-]*\w)(\s*=\s*(?:\".*?\"|'.*?'|[^'\">\s]+))?)+\s*|\s*)\/?>/i";
         preg_match_all($prereg, $string, $match);
         $uncomplete = $match[0];
-        bd($string);
         $uncomplete = array_reverse($uncomplete);
         if (!self::endsWith($uncomplete[0], ">")) {
             $re = "#(" . $uncomplete[0] . ")$#miU";

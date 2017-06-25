@@ -1,6 +1,14 @@
 # Changelog
 
 
+### 0.4.8 (2017-06-25)
+
+- new 'group' filter: allows creating groups from a PageArray based on a page field value
+- new 'replacetokens' helper filter for CKEditor 'Token Insertion' plugin (experimental)
+- new 'getline' filter: same as 'getlines' but returns only one item
+
+
+
 ### 0.4.7 (2017-06-14)
 
 - 'getlines' filter: added fallback to default language
