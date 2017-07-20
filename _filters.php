@@ -3,6 +3,160 @@
 $view = $this->wire($this->api_var);
 
 
+// explode string by a separator + trim + remove empty items
+function stringToArray($str, $separator, $format = 'string')
+{
+    if (strpos($str, $separator) === false) {
+        return false;
+    }
+
+    $arr = explode($separator, $str);
+    $arr = array_map('trim', $arr); //trim whitespace
+//    $arr = array_filter($arr, 'trim');  // remove empty items (removes 0x200 too!)
+
+    $arr = array_filter($arr, function ($value) {
+        return ($value !== null && $value !== false && $value !== '');
+    });
+
+    if ($format === 'int') {
+        $arr = array_map('intval', $arr);
+    }
+
+    return $arr;
+}
+
+
+// calculate width-height values for an image if one dimension is 0
+//function getCurrentSizePair($sizeArr, $ratio)
+//{
+//
+//    if ($sizeArr[0] == 0) {
+//        $sizeArr[0] = (int) ($sizeArr[1] * $ratio);
+//
+//    } elseif ($sizeArr[1] == 0) {
+//        $sizeArr[1] = (int) ($sizeArr[0] / $ratio);
+//    }
+//
+//    return $sizeArr;
+//}
+
+// Fix for empty localname
+// language name or id can be passed to retrieve localname in other languages
+// $page->localname:'dutch'
+// https://processwire.com/talk/topic/10742-find-page-name-field-in-non-default-language/
+$view->addFilter('localname', function ($p, $lang = null) {
+
+    if (!($p instanceof Page)) {
+        return false;
+    }
+
+    if (is_null($lang)) {
+        $lang = wire('user')->language;
+    }
+
+    $out = $p->localName($lang);
+
+    return strlen($out) ? $out : $p->name;
+});
+
+
+/**
+ * srcset filter for LazySizes
+ * IMPORTANT - add to CSS: img[data-sizes="auto"] { display: block; width: 100%; }
+ * eg. <img src="..." data-srcset="{$page->images->first()|srcset:'540x320,*3,/2', array('upscaling' => false)|noescape}" data-sizes="auto" alt="" class="lazyload" />
+ */
+$view->addFilter('srcset', function ($img, $sets = null, $options = null) {
+
+    $srcSetString = "";
+    $imgSizes = array();
+    $srcSets = array();
+
+    if (!($img instanceof Pageimage) || is_null($sets)) {
+        return false;
+    }
+
+    $srcsetArray = stringToArray($sets, ',');
+
+    if (!is_array($srcsetArray)) {
+        return false;
+    }
+
+    // get sets in array format
+    for ($ii = 0; $ii < count($srcsetArray); $ii++) {
+
+        $set = $srcsetArray[$ii];
+        $currentSize = false;
+
+        if ($set === '0x0') {
+            continue;
+        }
+
+        // first item must be width x height string (no multiplier nor divisor)
+        if ($ii === 0) {
+
+            // quit if it's not in WxH format
+            if (strpos($set, 'x') === false && strlen($set) < 3) {
+                return false;
+            }
+
+            $currentSize = stringToArray($set, 'x', 'int');
+
+        } else {
+
+            if (strpos($set, '/') === 0) {
+
+                // divisor, eg. "/3" - calculate values from first item of $imgSizes
+                $divisor = (double)ltrim($set, '/');
+
+                if ($divisor > 0) {
+                    $currentSize = array_map(function ($item) use ($divisor) {
+                        return (int)$item / $divisor;
+                    }, reset($imgSizes));
+                }
+
+            } elseif (strpos($set, '*') === 0) {
+
+                // multiplier, eg. "*3" - calculate values from first item of $imgSizes
+                $multiplier = (double)ltrim($set, '*');
+
+                if ($multiplier > 0) {
+                    $currentSize = array_map(function (&$item) use ($multiplier) {
+                        return (int)$item * $multiplier;
+                    }, reset($imgSizes));
+                }
+
+            } else {
+                // no divisor nor multiplier
+                $currentSize = stringToArray($set, 'x', 'int');
+            }
+        }
+
+        if ($currentSize) {
+            $imgSizes[] = $currentSize;
+        }
+    }
+
+    if (empty($imgSizes)) {
+        return false;
+    }
+    
+    // create associative array of resized images, use widths as keys
+    foreach ($imgSizes as $set) {
+        $currentImage = $img->size($set[0], $set[1], $options);
+        $srcSets[$currentImage->width] = $currentImage->url;
+    }
+
+    ksort($srcSets);
+
+    // build srcset string
+    foreach ($srcSets as $width => $url) {
+        $srcSetString .= $url . ' ' . $width . 'w,';
+    }
+
+    return rtrim($srcSetString, ',');
+});
+
+
 // return a default value if empty or falsy value passed
 // {$page->product_description|default:'No description is available for this product.'}
 $view->addFilter('default', function ($str = '', $default = '') {
@@ -11,7 +165,7 @@ $view->addFilter('default', function ($str = '', $default = '') {
 
 
 /**
- * filter t
+ * filter replacetokens (for CKEditor plugin Token Replacement)
  */
 $view->addFilter('replacetokens', function ($data, $tokenStart = "\${", $tokenEnd = "}") {
 
@@ -393,7 +547,7 @@ $view->addFilter('getlines', function ($source = null, $filter = '', $separator 
 $view->addFilter('getline', function () use ($view) {
     $out = $view->invokeFilter('getlines', func_get_args());
 
-    return reset($out);
+    return is_array($out) ? reset($out) : $out;
 });
 
 
@@ -468,10 +622,8 @@ $view->addFilter('lazy', function ($img = null, $divisor = null, $type = 'img', 
 
     if ($type === 'img') {
         $markup = $imgSmall->url . '" data-src="' . $img->url;
-    } else {
-        if ($type === 'bg') {
-            $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
-        }
+    } elseif ($type === 'bg') {
+        $markup = 'style="background-image: url(\'' . $imgSmall->url . '\')' . '" data-bgset="' . $img->url . '"';
     }
 
     return $markup;
@@ -491,8 +643,8 @@ $view->addFilter('bgset', function () use ($view) {
     $args = func_get_args();
     if (!isset($args[1])) {
         $args[1] = null;
-    }   // ensure there's a second parameter
-    $args[] = 'bg';
+    }
+    $args[] = 'bg'; // ensure there's a second parameter
 
     return $view->invokeFilter('lazy', $args);
 });
@@ -619,8 +771,13 @@ $view->addFilter('bgimage', function ($img = null) {
 });
 
 
+$view->addFilter('contains', function ($str = '', $search = '') {
+    return strpos($str, $search) !== false;
+});
+
+
 // Create group from PageArray based on $page field.
-// returns an array with key (field value) and items (array of pages)
+// returns an array of key (sanitized field value), title (field value) and items (array of pages)
 $view->addFilter('group', function ($pages, $fieldname = null) {
 
     if (is_null($fieldname) || !($pages instanceof \ProcessWire\PageArray)) {
@@ -630,25 +787,46 @@ $view->addFilter('group', function ($pages, $fieldname = null) {
     $group = array();
 
     for ($ii = 0; $ii < $pages->count(); $ii++) {
+
         $p = $pages[$ii];
-        $key = \ProcessWire\wire('sanitizer')->pageNameTranslate($p->{$fieldname});
 
         if ($p->template->hasField($fieldname)) {
+
+            $key = \ProcessWire\wire('sanitizer')->pageNameTranslate($p->{$fieldname});
+
             if (!isset($group[$key])) {
-                $group[$key] = array();
-                $group[$key]['key'] = $key;
-                $group[$key]['title'] = $p->{$fieldname};
-                $group[$key]['items'] = array();
+
+                $g = new \stdClass();
+
+                $g->key = $key;
+
+                $titleField = $p->{$fieldname};
+
+                if ($titleField instanceof \ProcessWire\SelectableOptionArray) {
+                    $g->title = $titleField->title;
+                } else {
+                    $g->title = $titleField;
+                }
+
+                $g->items = new \ProcessWire\PageArray;
+
+                $group[$key] = $g;
             }
-            $group[$key]['items'][] = $p;
+
+            $group[$key]->items->add($p);
         }
     }
 
-    // return array with numeric keys
-    return array_values($group);
+    return $group;
 });
 
 
+//https://www.labnol.org/internet/light-youtube-embeds/27941/
+$view->addFilter('embedyoutube', function ($url) {
+    $videoID = get_youtube_id_from_url($url);
+
+    return '<div class="youtube-player" data-id="' . $videoID . '"></div>';
+});
 
 // barDump (needs TracyDebugger module)
 $view->addFilter('bd', function ($data = null) {
@@ -998,32 +1176,22 @@ function get_vimeo_id_form_url($url)
  */
 function get_youtube_id_from_url($url)
 {
-
-    $pattern =
-        '%^# Match any youtube URL
-        (?:https?://)?  # Optional scheme. Either http or https
-        (?:www\.)?      # Optional www subdomain
-        (?:             # Group host alternatives
-          youtu\.be/    # Either youtu.be,
-        | youtube\.com  # or youtube.com
-          (?:           # Group path alternatives
-            /embed/     # Either /embed/
-          | /v/         # or /v/
-          | /watch\?v=  # or /watch\?v=
-          )             # End path alternatives.
-        )               # End host alternatives.
-        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
-        $%x';
-
-    $result = preg_match($pattern, $url, $matches);
-
-    if ($result) {
-        return $matches[1];
+    // return original string if doesn't seem to be an url (id only?)
+    if (!isValidURL($url)) {
+        return $url;
     }
 
-    return false;
+    parse_str(parse_url($url, PHP_URL_QUERY), $my_array_of_vars);
+    $result = $my_array_of_vars['v'];
+
+    return $result;
 }
 
+
+function isValidURL($url)
+{
+    return filter_var($url, FILTER_VALIDATE_URL);
+}
 
 /**
  * Class Text

@@ -87,9 +87,14 @@ $view->addMacro(
                 
             ob_start(function ($s, $phase) use ($enable_experimental) {
             
+                            // 0: replace newlines
+                //$html = preg_replace("/\r\n|\r|\n/", "", $s);
+            
                 // 1: remove whitespace from between tags that are not on the same line.
                 
                 $html=preg_replace(\'~>\s*\n\s*<~\', \'><\', $s); 
+                
+
                 
                 // 2: replace all repeated whitespace with a single space.
                 

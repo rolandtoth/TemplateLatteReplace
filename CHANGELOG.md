@@ -1,11 +1,21 @@
 # Changelog
 
 
-### 0.4.8 (2017-06-25)
+### 0.4.9 (2017-07-20)
+
+- clear cache if 'clearcache' GET parameter is present (SuperUser only)
+- new 'srcset' filter
+- new 'embedyoutube' filter (https://goo.gl/a8WxXH)
+- new 'localname' filter
+- GitHub wiki: add sidebar
+
+
+
+### 0.4.8 (2017-06-30)
 
 - new 'group' filter: allows creating groups from a PageArray based on a page field value
-- new 'replacetokens' helper filter for CKEditor 'Token Insertion' plugin (experimental)
 - new 'getline' filter: same as 'getlines' but returns only one item
+- new 'replacetokens' helper filter for CKEditor 'Token Insertion' plugin (experimental)
 
 
 
