@@ -79,6 +79,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
                 'session',
                 'templates',
                 'user'
+//                'view'    // note: api_var is added in ready()
             ),
         );
     }
@@ -145,6 +146,9 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         foreach ($defaultData['fuels'] as $fuel) {
             $view->$fuel = $this->wire($fuel);
         }
+
+        // add $view->api_var too
+        $view->{$this->api_var} = $view;
 
         // add global helper functions for string translation
         require_once(__DIR__ . '/global_functions.php');
