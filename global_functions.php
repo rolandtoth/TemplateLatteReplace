@@ -1,5 +1,11 @@
 <?php
 
+// to use with "savetemp" filter
+function gettemp() {
+    global $_tmp;
+    return $_tmp;
+};
+
 /**
  * Global helper function for string translation.
  *

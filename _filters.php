@@ -2,7 +2,6 @@
 
 $view = $this->wire($this->api_var);
 
-
 // explode string by a separator + trim + remove empty items
 function stringToArray($str, $separator, $format = 'string')
 {
@@ -65,7 +64,7 @@ $view->addFilter('localname', function ($p, $lang = null) {
  * IMPORTANT - add to CSS: img[data-sizes="auto"] { display: block; width: 100%; }
  * eg. <img src="..." data-srcset="{$page->images->first()|srcset:'540x320,*3,/2', array('upscaling' => false)|noescape}" data-sizes="auto" alt="" class="lazyload" />
  */
-$view->addFilter('srcset', function ($img, $sets = null, $options = null) {
+$view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($view) {
 
     $srcSetString = "";
     $imgSizes = array();
@@ -139,7 +138,7 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) {
     if (empty($imgSizes)) {
         return false;
     }
-    
+
     // create associative array of resized images, use widths as keys
     foreach ($imgSizes as $set) {
         $currentImage = $img->size($set[0], $set[1], $options);
@@ -153,7 +152,20 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) {
         $srcSetString .= $url . ' ' . $width . 'w,';
     }
 
+    $view->_srcset = $srcSets;
+
     return rtrim($srcSetString, ',');
+});
+
+
+// set temporary variable and return original data
+// variable can be used as gettemp() afterwards
+$view->addFilter('savetemp', function ($data) {
+
+    global $_tmp;
+    $_tmp = $data;
+
+    return $data;
 });
 
 
@@ -431,10 +443,30 @@ $view->addFilter('first', function ($arr = null) {
     return is_array($arr) ? reset($arr) : $arr;
 });
 
+// get first key of an array
+$view->addFilter('firstkey', function ($arr = null) {
+    if (!is_array($arr)) {
+        return $arr;
+    }
+    reset($arr);
+
+    return key($arr);
+});
+
 
 // get last item of an array
 $view->addFilter('last', function ($arr = null) {
     return is_array($arr) ? end($arr) : $arr;
+});
+
+// get last key of an array
+$view->addFilter('lastkey', function ($arr = null) {
+    if (!is_array($arr)) {
+        return $arr;
+    }
+    end($arr);
+
+    return key($arr);
 });
 
 

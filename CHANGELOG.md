@@ -1,6 +1,13 @@
 # Changelog
 
 
+### 0.5.0 (2017-07-24)
+
+- new "savetemp" filter: save data to a variable to reuse later
+- new firstkey, lastkey filters (for arrays)
+
+
+
 ### 0.4.9 (2017-07-20)
 
 - clear cache if 'clearcache' GET parameter is present (SuperUser only)
