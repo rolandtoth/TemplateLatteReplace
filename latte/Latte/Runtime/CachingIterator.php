@@ -5,6 +5,8 @@
  * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Latte\Runtime;
 
 use Latte;
@@ -56,9 +58,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 	/**
 	 * Is the current element the first one?
 	 * @param  int  grid width
-	 * @return bool
 	 */
-	public function isFirst($width = NULL)
+	public function isFirst(int $width = null): bool
 	{
 		return $this->counter === 1 || ($width && $this->counter !== 0 && (($this->counter - 1) % $width) === 0);
 	}
@@ -67,9 +68,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 	/**
 	 * Is the current element the last one?
 	 * @param  int  grid width
-	 * @return bool
 	 */
-	public function isLast($width = NULL)
+	public function isLast(int $width = null): bool
 	{
 		return !$this->hasNext() || ($width && ($this->counter % $width) === 0);
 	}
@@ -77,9 +77,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Is the iterator empty?
-	 * @return bool
 	 */
-	public function isEmpty()
+	public function isEmpty(): bool
 	{
 		return $this->counter === 0;
 	}
@@ -87,9 +86,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Is the counter odd?
-	 * @return bool
 	 */
-	public function isOdd()
+	public function isOdd(): bool
 	{
 		return $this->counter % 2 === 1;
 	}
@@ -97,9 +95,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Is the counter even?
-	 * @return bool
 	 */
-	public function isEven()
+	public function isEven(): bool
 	{
 		return $this->counter % 2 === 0;
 	}
@@ -107,9 +104,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Returns the counter.
-	 * @return int
 	 */
-	public function getCounter()
+	public function getCounter(): int
 	{
 		return $this->counter;
 	}
@@ -117,9 +113,8 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Returns the count of elements.
-	 * @return int
 	 */
-	public function count()
+	public function count(): int
 	{
 		$inner = $this->getInnerIterator();
 		if ($inner instanceof \Countable) {
@@ -194,11 +189,9 @@ class CachingIterator extends \CachingIterator implements \Countable
 
 	/**
 	 * Is property defined?
-	 * @return bool
 	 */
-	public function __isset($name)
+	public function __isset($name): bool
 	{
 		return method_exists($this, 'get' . $name) || method_exists($this, 'is' . $name);
 	}
-
 }

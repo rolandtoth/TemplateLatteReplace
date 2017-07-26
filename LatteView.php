@@ -10,6 +10,17 @@ use Latte\Macros\MacroSet;
 class LatteView
 {
 
+    public $tmp;
+
+
+    function __construct()
+    {
+        $this->temp = function () {
+            return $this->tmp;
+        };
+    }
+
+
     public function invokeFilter($name, $args)
     {
         if (!is_array($args)) {
@@ -37,5 +48,11 @@ class LatteView
     public function addFilter($name, $closure)
     {
         $this->latte->addFilter($name, $closure);
+    }
+
+
+    public function savetemp($data)
+    {
+        return $this->tmp = $data;
     }
 }

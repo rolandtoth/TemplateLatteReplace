@@ -5,6 +5,8 @@
  * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Latte;
 
 
@@ -16,18 +18,17 @@ class Helpers
 {
 	/** @var array  empty (void) HTML elements */
 	public static $emptyElements = [
-		'img' => 1,'hr' => 1,'br' => 1,'input' => 1,'meta' => 1,'area' => 1,'embed' => 1,'keygen' => 1,'source' => 1,'base' => 1,
-		'col' => 1,'link' => 1,'param' => 1,'basefont' => 1,'frame' => 1,'isindex' => 1,'wbr' => 1,'command' => 1,'track' => 1,
+		'img' => 1, 'hr' => 1, 'br' => 1, 'input' => 1, 'meta' => 1, 'area' => 1, 'embed' => 1, 'keygen' => 1, 'source' => 1, 'base' => 1,
+		'col' => 1, 'link' => 1, 'param' => 1, 'basefont' => 1, 'frame' => 1, 'isindex' => 1, 'wbr' => 1, 'command' => 1, 'track' => 1,
 	];
 
 
 	/**
 	 * Checks callback.
-	 * @return callable
 	 */
-	public static function checkCallback($callable)
+	public static function checkCallback($callable): callable
 	{
-		if (!is_callable($callable, FALSE, $text)) {
+		if (!is_callable($callable, false, $text)) {
 			throw new \InvalidArgumentException("Callback '$text' is not callable.");
 		}
 		return $callable;
@@ -36,11 +37,11 @@ class Helpers
 
 	/**
 	 * Finds the best suggestion.
-	 * @return string|NULL
+	 * @return string|null
 	 */
 	public static function getSuggestion(array $items, $value)
 	{
-		$best = NULL;
+		$best = null;
 		$min = (strlen($value) / 4 + 1) * 10 + .1;
 		foreach (array_unique($items, SORT_REGULAR) as $item) {
 			$item = is_object($item) ? $item->getName() : $item;
@@ -53,10 +54,7 @@ class Helpers
 	}
 
 
-	/**
-	 * @return bool
-	 */
-	public static function removeFilter(&$modifier, $filter)
+	public static function removeFilter(&$modifier, $filter): bool
 	{
 		$modifier = preg_replace('#\|(' . $filter . ')\s?(?=\||\z)#i', '', $modifier, -1, $found);
 		return (bool) $found;
@@ -65,11 +63,9 @@ class Helpers
 
 	/**
 	 * Starts the $haystack string with the prefix $needle?
-	 * @return bool
 	 */
-	public static function startsWith($haystack, $needle)
+	public static function startsWith($haystack, $needle): bool
 	{
 		return strncmp($haystack, $needle, strlen($needle)) === 0;
 	}
-
 }

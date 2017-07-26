@@ -1,9 +1,17 @@
 # Changelog
 
 
-### 0.5.0 (2017-07-24)
+### 0.5.1 (2017-07-26)
 
-- new "savetemp" filter: save data to a variable to reuse later
+- Latte updated to 3.0.0-dev (requires PHP 7.0)
+- savetemp filter: changed gettemp() to $gettemp() to avoid global function
+- minify macro: remove experimental features
+
+
+
+### 0.5.0 (2017-07-25)
+
+- new "savetemp" filter: save data to reuse later using gettemp()
 - new firstkey, lastkey filters (for arrays)
 
 

@@ -5,6 +5,8 @@
  * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Latte;
 
 
@@ -26,10 +28,7 @@ class MacroNode
 	public $name;
 
 	/** @var bool */
-	public $empty = FALSE;
-
-	/** @deprecated */
-	public $isEmpty;
+	public $empty = false;
 
 	/** @var string  raw arguments */
 	public $args;
@@ -38,7 +37,7 @@ class MacroNode
 	public $modifiers;
 
 	/** @var bool */
-	public $closing = FALSE;
+	public $closing = false;
 
 	/** @var bool  has output? */
 	public $replaced;
@@ -86,7 +85,7 @@ class MacroNode
 	public $saved;
 
 
-	public function __construct(IMacro $macro, $name, $args = NULL, $modifiers = NULL, self $parentNode = NULL, HtmlNode $htmlNode = NULL, $prefix = NULL)
+	public function __construct(IMacro $macro, $name, $args = null, $modifiers = null, self $parentNode = null, HtmlNode $htmlNode = null, $prefix = null)
 	{
 		$this->macro = $macro;
 		$this->name = (string) $name;
@@ -95,7 +94,6 @@ class MacroNode
 		$this->htmlNode = $htmlNode;
 		$this->prefix = $prefix;
 		$this->data = new \stdClass;
-		$this->isEmpty = &$this->empty;
 		$this->setArgs($args);
 	}
 
@@ -110,8 +108,7 @@ class MacroNode
 	public function getNotation()
 	{
 		return $this->prefix
-			? Parser::N_PREFIX . ($this->prefix === MacroNode::PREFIX_NONE ? '' : $this->prefix . '-') . $this->name
+			? Parser::N_PREFIX . ($this->prefix === self::PREFIX_NONE ? '' : $this->prefix . '-') . $this->name
 			: '{' . $this->name . '}';
 	}
-
 }

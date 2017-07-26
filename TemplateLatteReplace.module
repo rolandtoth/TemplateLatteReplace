@@ -38,8 +38,8 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 50,
-            'requires' => 'PHP>=5.4.0, ProcessWire>=3.0.0',
+            'version'  => 51,
+            'requires' => 'PHP>=7.0.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
             'icon'     => 'code'
@@ -79,7 +79,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
                 'session',
                 'templates',
                 'user'
-//                'view'    // note: api_var is added in ready()
             ),
         );
     }
@@ -148,7 +147,10 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
 
         // add $view->api_var too
-        $view->{$this->api_var} = $view;
+//        $view->{$this->api_var} = $view;
+
+        // for 'savetemp' filter (use as $gettemp() in view files)
+        $view->gettemp = $view->temp;
 
         // add global helper functions for string translation
         require_once(__DIR__ . '/global_functions.php');

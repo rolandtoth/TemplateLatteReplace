@@ -5,6 +5,8 @@
  * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Latte;
 
 
@@ -46,5 +48,4 @@ class Token
 
 	/** @var bool  is tag empty {name/}? used for type MACRO_TAG */
 	public $empty;
-
 }

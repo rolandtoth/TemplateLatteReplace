@@ -66,6 +66,8 @@ $view->addFilter('localname', function ($p, $lang = null) {
  */
 $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($view) {
 
+	global $_tmp;
+
     $srcSetString = "";
     $imgSizes = array();
     $srcSets = array();
@@ -152,7 +154,7 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
         $srcSetString .= $url . ' ' . $width . 'w,';
     }
 
-    $view->_srcset = $srcSets;
+    $_tmp = $srcSets;
 
     return rtrim($srcSetString, ',');
 });
@@ -160,10 +162,9 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
 
 // set temporary variable and return original data
 // variable can be used as gettemp() afterwards
-$view->addFilter('savetemp', function ($data) {
+$view->addFilter('savetemp', function ($data) use ($view) {
 
-    global $_tmp;
-    $_tmp = $data;
+    $view->savetemp($data);
 
     return $data;
 });

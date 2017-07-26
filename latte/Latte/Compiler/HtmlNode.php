@@ -5,6 +5,8 @@
  * Copyright (c) 2008 David Grudl (https://davidgrudl.com)
  */
 
+declare(strict_types=1);
+
 namespace Latte;
 
 
@@ -21,9 +23,6 @@ class HtmlNode
 	/** @var bool */
 	public $empty;
 
-	/** @deprecated */
-	public $isEmpty;
-
 	/** @var array */
 	public $attrs = [];
 
@@ -31,7 +30,7 @@ class HtmlNode
 	public $macroAttrs = [];
 
 	/** @var bool */
-	public $closing = FALSE;
+	public $closing = false;
 
 	/** @var HtmlNode */
 	public $parentNode;
@@ -49,11 +48,9 @@ class HtmlNode
 	public $innerMarker;
 
 
-	public function __construct($name, self $parentNode = NULL)
+	public function __construct($name, self $parentNode = null)
 	{
 		$this->name = $name;
 		$this->parentNode = $parentNode;
-		$this->isEmpty = &$this->empty;
 	}
-
 }
