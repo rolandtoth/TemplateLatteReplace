@@ -1,6 +1,12 @@
 # Changelog
 
 
+### 0.5.2 (2017-07-31)
+
+- fix $gettemp() being unavailable without calling savetemp filter first (eg. from other filters)
+
+
+
 ### 0.5.1 (2017-07-26)
 
 - Latte updated to 3.0.0-dev (requires PHP 7.0)

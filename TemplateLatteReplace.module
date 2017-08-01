@@ -38,7 +38,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 51,
+            'version'  => 52,
             'requires' => 'PHP>=7.0.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -92,6 +92,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         foreach (self::getDefaultData() as $key => $value) {
             $this->$key = $value;
         }
+
     }
 
     public function ___uninstall()
@@ -172,6 +173,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
     }
+
 
     public function hookRender(HookEvent $event)
     {
@@ -259,7 +261,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             }
         });
 
-        // this makes _'string' work in .latte files
+        // make _'string' work in .latte files
         $latte->addFilter('translate', function () {
             return _t(func_get_args());
         });

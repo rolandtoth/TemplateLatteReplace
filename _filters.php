@@ -66,8 +66,6 @@ $view->addFilter('localname', function ($p, $lang = null) {
  */
 $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($view) {
 
-	global $_tmp;
-
     $srcSetString = "";
     $imgSizes = array();
     $srcSets = array();
@@ -95,9 +93,14 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
         // first item must be width x height string (no multiplier nor divisor)
         if ($ii === 0) {
 
-            // quit if it's not in WxH format
-            if (strpos($set, 'x') === false && strlen($set) < 3) {
-                return false;
+            // stop if it's not in WxH format
+            if (strpos($set, 'x') === false) {
+                // if it's only a number, assume Wx0
+                if (is_numeric($set) && (int)$set > 0) {
+                    $set = $set . 'x0';
+                } else {
+                    return false;
+                }
             }
 
             $currentSize = stringToArray($set, 'x', 'int');
@@ -154,7 +157,7 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
         $srcSetString .= $url . ' ' . $width . 'w,';
     }
 
-    $_tmp = $srcSets;
+    $view->savetemp($srcSets);
 
     return rtrim($srcSetString, ',');
 });
