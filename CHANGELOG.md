@@ -1,6 +1,12 @@
 # Changelog
 
 
+### 0.5.3 (2017-08-22)
+
+- editlink: append attributes to defaults if it starts with "+"
+
+
+
 ### 0.5.2 (2017-07-31)
 
 - fix $gettemp() being unavailable without calling savetemp filter first (eg. from other filters)

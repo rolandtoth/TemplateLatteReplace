@@ -60,7 +60,12 @@ $view->addMacro(
             }
 
             extract($args);
-        
+            
+            // append $args to default args set in $view->editlinkDefaults if $attrs starts with "+"
+            if (isset($attrs) && substr($attrs, 0, 1) === "+") {
+                $attrs = $defaults["attrs"] . " " . ltrim($attrs, "+");
+            }
+            
             if (is_numeric($target)) $target = $wire->pages->get($target);
             
             if ($target instanceof \ProcessWire\Page && $target->editable() && $target->template != "admin" && $user->isLoggedin()) {
