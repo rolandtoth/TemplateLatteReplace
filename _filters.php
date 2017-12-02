@@ -1173,17 +1173,16 @@ $view->addFilter('surround', function ($data = null, $startTag = null) {
  *
  * @return string Youtube or Vimeo embed url or FALSE if url is not supported.
  */
-$view->addFilter('getembedurl', function ($url) {
+$view->addFilter('getembedurl', function ($url, $host = 'youtube') {
 
-    $embed_url = false;
+    $embed_url = $url;
     $youtube_embed_base = 'https://www.youtube.com/embed/';
     $vimeo_embed_base = 'https://player.vimeo.com/video/';
 
-    if (strpos($url, 'youtube') > 0) {
-        $embed_url = $youtube_embed_base . get_youtube_id_from_url($url);
-
-    } elseif (strpos($url, 'vimeo') > 0) {
+    if (strpos($url, 'vimeo.') > 0 || $host === 'vimeo') {
         $embed_url = $vimeo_embed_base . get_vimeo_id_form_url($url);
+    } else if (strpos($url, 'youtube.') > 0 || $host === 'youtube') {
+	    $embed_url = $youtube_embed_base . get_youtube_id_from_url($url);
     }
 
     return $embed_url;

@@ -1,6 +1,12 @@
 # Changelog
 
 
+### 0.5.4 (2017-12-02)
+
+- getembedurl filter improvements
+
+
+
 ### 0.5.3 (2017-08-22)
 
 - editlink: append attributes to defaults if it starts with "+"
