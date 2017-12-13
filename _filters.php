@@ -183,7 +183,7 @@ $view->addFilter('savetemp', function ($data) use ($view) {
  *
  * @return bool
  */
-$view->addFilter('hasoption', function ($p, $field_with_key = '') {
+$view->addFilter('optionchecked', function ($p, $field_with_key = '') {
 
     if (!($p instanceof Page) || !strpos($field_with_key, '.') > 0) {
         return false;

@@ -3,7 +3,7 @@
 
 ### 0.5.5 (2017-12-13)
 
-- new filter: hasoption
+- new filter: optionchecked
 
 
 
