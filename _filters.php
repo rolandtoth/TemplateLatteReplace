@@ -173,6 +173,37 @@ $view->addFilter('savetemp', function ($data) use ($view) {
 });
 
 
+/**
+ * Check if a Select Options field on a page has a given option selected.
+ *
+ * @param $p              \ProcessWire\Page
+ * @param $field_with_key string field name and option id/value/title with dot notation,
+ *                        eg. "page_options.3" or "page_options.hide_header" or "page_options.Hide header"
+ *                        in "3=hide_header|Hide header"
+ *
+ * @return bool
+ */
+$view->addFilter('hasoption', function ($p, $field_with_key = '') {
+
+    if (!($p instanceof Page) || !strpos($field_with_key, '.') > 0) {
+        return false;
+    }
+
+    $arr = explode('.', $field_with_key);
+    $f = trim($arr[0]); // string chunk until the first dot
+
+    if(!$p->template->hasField($f)) {
+        return false;
+    }
+
+    $key = substr($field_with_key, strlen($f) + 1); // rest of the string
+
+    $selector = is_numeric($key) ? $key : 'value|title=' . htmlentities($key);
+
+    return $p->{$f}->has($selector);
+});
+
+
 // return a default value if empty or falsy value passed
 // {$page->product_description|default:'No description is available for this product.'}
 $view->addFilter('default', function ($str = '', $default = '') {
@@ -1173,16 +1204,17 @@ $view->addFilter('surround', function ($data = null, $startTag = null) {
  *
  * @return string Youtube or Vimeo embed url or FALSE if url is not supported.
  */
-$view->addFilter('getembedurl', function ($url, $host = 'youtube') {
+$view->addFilter('getembedurl', function ($url) {
 
-    $embed_url = $url;
+    $embed_url = false;
     $youtube_embed_base = 'https://www.youtube.com/embed/';
     $vimeo_embed_base = 'https://player.vimeo.com/video/';
 
-    if (strpos($url, 'vimeo.') > 0 || $host === 'vimeo') {
+    if (strpos($url, 'youtube') > 0) {
+        $embed_url = $youtube_embed_base . get_youtube_id_from_url($url);
+
+    } elseif (strpos($url, 'vimeo') > 0) {
         $embed_url = $vimeo_embed_base . get_vimeo_id_form_url($url);
-    } else if (strpos($url, 'youtube.') > 0 || $host === 'youtube') {
-	    $embed_url = $youtube_embed_base . get_youtube_id_from_url($url);
     }
 
     return $embed_url;

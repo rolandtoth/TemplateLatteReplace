@@ -1,6 +1,12 @@
 # Changelog
 
 
+### 0.5.5 (2017-12-13)
+
+- new filter: hasoption
+
+
+
 ### 0.5.4 (2017-12-02)
 
 - getembedurl filter improvements
