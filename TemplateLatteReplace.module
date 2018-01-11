@@ -38,7 +38,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 55,
+            'version'  => 56,
             'requires' => 'PHP>=7.0.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -52,14 +52,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     static public function getDefaultData()
     {
-
         return array(
             "cacheDir"          => str_replace('ProcessWire\\', '', __CLASS__),
             "api_var"           => 'view',
             "viewsDir"          => '',
             "defaultTextdomain" => '/site/templates/_strings.php',
             "defaultLayoutFile" => '@layout.latte',
-            'ignoredTemplates'  => 'form-builder, email-administrator, email-autoresponder, HannaCode',
+            'ignoredTemplates'  => 'form-builder, email-administrator, email-autoresponder, HannaCode, consoleCode, snippetRunner',
             "options"           => array(
                 'extraMacros',
                 'extraFilters'

@@ -98,6 +98,8 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
                 // if it's only a number, assume Wx0
                 if (is_numeric($set) && (int)$set > 0) {
                     $set = $set . 'x0';
+                } elseif ($set === "original") {    // if it's "original", add current image dimensions (eg. for Croppable Image 3 module)
+                      $set = $img->width . '_originalx' . $img->height;
                 } else {
                     return false;
                 }
@@ -170,6 +172,49 @@ $view->addFilter('savetemp', function ($data) use ($view) {
     $view->savetemp($data);
 
     return $data;
+});
+
+
+/**
+ * Read SVG file - Experimental: do not use in production
+ *
+ * todo
+ *
+ * remove hardcoded /images directory
+ * remove existing width/height if $size is set
+ * documentation
+ */
+$view->addFilter('readsvg', function ($path, $size = null, $expiration = 300) {
+
+    $varName = wire('sanitizer')->varName($path);
+
+//    wire('cache')->delete($varName);
+
+    return wire('cache')->get($varName, $expiration, function () use ($path, $size) {
+
+        // check if full path is supplied
+        if (substr($path, 0, 1) !== '/') {
+            $path = wire('config')->paths->templates . 'images/' . $path;
+        }
+
+        $varName = file_get_contents($path);
+
+        if (!is_null($size) && !empty($size)) {
+
+            // if height is not set, use width
+            $size = is_array($size) ? $size : array($size, $size);
+
+            // third param = multiplier
+            $multiplier = isset($size[2]) ? $size[2] : 1;
+
+            $width = round($size[0] * $multiplier);
+            $height = round(isset($size[1]) ? $size[1] * $multiplier : $width);
+
+            $varName = str_replace('<svg ', '<svg width="' . $width . '" height="' . $height . '" ', $varName);
+        }
+
+        return $varName;
+    });
 });
 
 

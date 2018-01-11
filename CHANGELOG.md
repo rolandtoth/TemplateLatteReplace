@@ -1,6 +1,14 @@
 # Changelog
 
 
+### 0.5.6 (2017-01-11)
+
+- added Tracy Debugger's templates to the default ignored templates
+- add "original" keyword to the srcset filter
+- added experimental filter "readsvg" (do not use in production)
+
+
+
 ### 0.5.5 (2017-12-13)
 
 - new filter: optionchecked
