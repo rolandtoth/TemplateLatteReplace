@@ -16,6 +16,12 @@ $view->addMacro(
 );
 
 $view->addMacro(
+    'ifpage',
+    'if (%node.word instanceof \ProcessWire\Page && %node.word->id) { $p = %node.word;',
+    '}'
+);
+
+$view->addMacro(
     'pages',
     '$pArr = \ProcessWire\wire("pages")->find(%node.word)',
     ';'

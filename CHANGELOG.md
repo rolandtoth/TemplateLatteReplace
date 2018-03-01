@@ -1,10 +1,17 @@
 # Changelog
 
 
-### 0.5.6 (2017-01-11)
+### 0.5.7 (2018-03-01)
+
+- added "ifpage" macro
+- added "getchildren" filter (+ alias "children")
+
+
+
+### 0.5.6 (2018-01-11)
 
 - added Tracy Debugger's templates to the default ignored templates
-- add "original" keyword to the srcset filter
+- added "original" keyword to the srcset filter
 - added experimental filter "readsvg" (do not use in production)
 
 

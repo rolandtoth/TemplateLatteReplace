@@ -99,7 +99,7 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
                 if (is_numeric($set) && (int)$set > 0) {
                     $set = $set . 'x0';
                 } elseif ($set === "original") {    // if it's "original", add current image dimensions (eg. for Croppable Image 3 module)
-                      $set = $img->width . '_originalx' . $img->height;
+                    $set = $img->width . '_originalx' . $img->height;
                 } else {
                     return false;
                 }
@@ -237,7 +237,7 @@ $view->addFilter('optionchecked', function ($p, $field_with_key = '') {
     $arr = explode('.', $field_with_key);
     $f = trim($arr[0]); // string chunk until the first dot
 
-    if(!$p->template->hasField($f)) {
+    if (!$p->template->hasField($f)) {
         return false;
     }
 
@@ -369,6 +369,35 @@ $view->addFilter('getpages', function ($selector = null, $extraSelector = null) 
     return $this->wire('pages')->find($selector);
 });
 
+/**
+ * Returns child pages, applied to a selector or a Page.
+ * eg. (1023|getchildren:'limit=3')
+ * eg. ($page|getchildren:'limit=3')
+ */
+$view->addFilter('getchildren', function ($selector = null, $extraSelector = '') use ($view) {
+
+    if ($selector instanceof Page) {
+
+        return $selector->children($extraSelector);
+
+    } else {
+
+        $p = $view->invokeFilter('getpage', $selector);
+
+        if ($p instanceof Page) {
+            return $p->children($extraSelector);
+        }
+    }
+
+    return false;
+});
+
+
+// alias for "getchildren"
+$view->addFilter('children', function ($selector = null, $extraSelector = '') use ($view) {
+    return $view->invokeFilter('getchildren', func_get_args());
+});
+
 
 $view->addFilter('renderpager', function ($pArr = null, $options = null) {
 
@@ -411,7 +440,7 @@ $view->addFilter('renderpager', function ($pArr = null, $options = null) {
 });
 
 
-// alias to "renderpager"
+// alias for "renderpager"
 $view->addFilter('pager', function () use ($view) {
     return $view->invokeFilter('renderpager', func_get_args());
 });
@@ -962,7 +991,7 @@ $view->addFilter('d', function ($data = null) {
 });
 
 
-// alias to "d"
+// alias for "d"
 $view->addFilter('dump', function () use ($view) {
     return $view->invokeFilter('d', func_get_args());
 });
@@ -1195,7 +1224,7 @@ $view->addFilter('sanitize', function ($value = null, $fx = null, $options = nul
 });
 
 
-// alias to "sanitize"
+// alias for "sanitize"
 $view->addFilter('sanitizer', function () use ($view) {
     return $view->invokeFilter('sanitize', func_get_args());
 });
