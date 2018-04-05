@@ -1,7 +1,14 @@
 # Changelog
 
 
-### 0.5.7 (2018-03-01)
+### 0.5.8 (2018-04-05)
+
+- added "ifstatus" macro
+- added "ifloggedin" macro
+
+
+
+### 0.5.7 (2018-02-21)
 
 - added "ifpage" macro
 - added "getchildren" filter (+ alias "children")

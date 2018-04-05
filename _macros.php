@@ -10,6 +10,12 @@ $view->addMacro(
 );
 
 $view->addMacro(
+    'ifloggedin',
+    'if (\ProcessWire\wire("user")->isLoggedIn()) {',
+    '}'
+);
+
+$view->addMacro(
     'page',
     '$p = \ProcessWire\wire("pages")->get(%node.word)',
     ';'
@@ -112,4 +118,57 @@ $view->addMacro(
         );
     },
     'ob_end_flush();'
+);
+
+
+// unpublished, hidden, locked, system, trash, draft + public, published
+$view->addMacro(
+    'ifstatus',
+    function (MacroNode $node, PhpWriter $writer) {
+        return $writer->write('
+            $args = %node.array;
+            $_p = isset($args[0]) ? $args[0] : false;
+            $_status = isset($args[1]) ? $args[1] : false;
+            $reversed = false;
+            
+            if(is_numeric($_p)) {
+                $_p = \ProcessWire\wire("pages")->get($_p);
+            }
+            
+            if($_p && $_status) {
+            
+                $_cond = true;
+            
+                if(!is_array($_status)) {
+                    $_status = array($_status);
+                }
+                
+                foreach($_status as $_s) {
+                
+                    $_s = trim($_s);
+            
+                    if(strpos($_s, "!") === 0) {
+                        $reversed = true;
+                        $_s = ltrim($_s, "!");
+                    }
+                
+                    if($_s === "published") {   // not in API
+                        $cond = !$_p->hasStatus("unpublished") && !$_p->hasStatus("hidden") && !$_p->isTrash();
+                    } elseif($_s === "public") {
+                        $cond = $_p->isPublic();    // not in API
+                    } else {
+                        $cond = $_p->hasStatus($_s);
+                    }
+                    
+                    if($reversed) {
+                        $cond = !$cond;
+                    }
+                    
+                    $_cond = $_cond && $cond;
+                }
+                
+                if($_cond) {
+        ');
+    },
+    '}}'
 );

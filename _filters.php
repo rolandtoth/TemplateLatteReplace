@@ -99,7 +99,7 @@ $view->addFilter('srcset', function ($img, $sets = null, $options = null) use ($
                 if (is_numeric($set) && (int)$set > 0) {
                     $set = $set . 'x0';
                 } elseif ($set === "original") {    // if it's "original", add current image dimensions (eg. for Croppable Image 3 module)
-                    $set = $img->width . '_originalx' . $img->height;
+                      $set = $img->width . '_originalx' . $img->height;
                 } else {
                     return false;
                 }
@@ -237,7 +237,7 @@ $view->addFilter('optionchecked', function ($p, $field_with_key = '') {
     $arr = explode('.', $field_with_key);
     $f = trim($arr[0]); // string chunk until the first dot
 
-    if (!$p->template->hasField($f)) {
+    if(!$p->template->hasField($f)) {
         return false;
     }
 
@@ -629,7 +629,6 @@ $view->addFilter('getlines', function ($source = null, $filter = '', $separator 
     $lines = array_filter($lines, 'trim');  // remove empty lines
 
     $lines = array_values($lines);  // rearrange array keys to avoid gap
-
 
     if (strlen($filter)) {
         $filter_data = explode(',', $filter);
