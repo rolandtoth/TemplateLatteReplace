@@ -55,4 +55,5 @@ class LatteView
     {
         return $this->tmp = $data;
     }
+
 }

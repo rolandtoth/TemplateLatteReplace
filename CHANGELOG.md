@@ -1,6 +1,15 @@
 # Changelog
 
 
+### 0.5.9 (2018-04-24)
+
+- added "replacevalues" filter
+- added Padloper templates to default ignored template list
+- removed settings "disable noescape filter"
+- code optimizations
+
+
+
 ### 0.5.8 (2018-04-05)
 
 - added "ifstatus" macro
