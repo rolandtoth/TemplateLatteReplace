@@ -246,18 +246,26 @@ $view->addFilter('default', function ($str = '', $default = '') {
  * If $replacements is not an array then the getlines filter will be applied to it.
  *
  * @param array|string $replacements
+ *
+ * @return string
  */
-$view->addFilter('replacevalues', function ($data, $replacements) use ($view) {
+$view->addFilter('replacesubs', function ($data, $replacements) use ($view) {
 
-    if(!is_array($replacements)) {
+    if (!is_array($replacements)) {
         // try to parse as textarea lines
         $replacements = $view->invokeFilter('getlines', array($replacements));
     }
 
     if (!empty($replacements)) {
-        foreach ($replacements as $key => $value) {
-            $data = str_ireplace('((' . $key . '))', $value, $data);
+
+        // change keys to ((key))
+        $arr = array();
+        foreach ($replacements as $k => $v) {
+            $arr['((' . $k . '))'] = $v;
+            unset($replacements[$k]);
         }
+
+        $data = strtr($data, $arr);
     }
 
     return $data;
