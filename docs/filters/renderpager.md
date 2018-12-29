@@ -1,4 +1,4 @@
-## renderpager
+# [Filter] renderpager
 
 Returns a pagination markup (pager) when applied to a PageArray. Accepts one parameter: a number (numPageLinks) or an array to override the defaults. The alias "pager" can also be used.
 
@@ -30,7 +30,7 @@ $view->customPaginationSettings = array(
 );
 ```
 
-### Default values
+## Default values
 
 You can set common default values by creating a `$view->renderPagerDefaults` array, eg. in ready.php file. This way all pagers will use these settings but you can override them individually in view files if needed.
 

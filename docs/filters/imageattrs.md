@@ -1,4 +1,4 @@
-## imageattrs
+# [Filter] imageattrs
 
 Adds width, height and alt attributes to an image.
 

@@ -1,4 +1,4 @@
-## niceurl
+# [Filter] niceurl
 
 Removes "http(s)" and/or "www" from a link, useful for outputting shorter links.
 

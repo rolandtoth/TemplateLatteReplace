@@ -1,4 +1,4 @@
-## ifloggedin
+# [Macro] ifloggedin
 
 A simple if macro to check if the current user is logged in.
 

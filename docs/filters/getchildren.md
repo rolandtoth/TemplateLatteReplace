@@ -1,4 +1,4 @@
-## getchildren
+# [Filter] getchildren
 
 Returns child pages, applied to a selector or a Page. A selector string can be passed to filter children.
 

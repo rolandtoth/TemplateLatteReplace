@@ -1,4 +1,4 @@
-## lazy
+# [Filter] lazy
 
 Adds `data-src` tag to img tag to be used with [Lazysizes](https://github.com/aFarkas/lazysizes). 
 

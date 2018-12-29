@@ -1,4 +1,4 @@
-## consolelog
+# [Filter] consolelog
 
 Logs to the console (developer tools).
 

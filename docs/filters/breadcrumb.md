@@ -1,4 +1,4 @@
-## breadcrumb
+# [Filter] breadcrumb
 
 Generates markup (unordered HTML list) for breadcrumbs. Note that no separator is added, use CSS for that.
 
@@ -21,7 +21,7 @@ Pass an array of options to fine-tune:
 </div>
 ```
 
-### Default values
+## Default values
 
 You can set default values by adding a `$view->breadcrumbDefaults` array, eg. in ready.php file:
 

@@ -1,4 +1,4 @@
-## surround
+# [Filter] surround
 
 Surround item or array of items with html tag. The angle brackets can be included or excluded around html tags.
 

@@ -1,4 +1,4 @@
-## getpages
+# [Filter] getpages
 
 This is a "filter" version of the macro "pages" (see above). The difference is that you can pass an extra selector too.
 

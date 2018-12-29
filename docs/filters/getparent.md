@@ -1,4 +1,4 @@
-## getparent
+# [Filter] getparent
 
 Simply returns the given PageArray's parent page, eg. when using with getpages filter.
 

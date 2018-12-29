@@ -1,4 +1,4 @@
-## getpage
+# [Filter] getpage
 
 This is a "filter" version of the macro "page" (see above) that makes really easy to reference a page by ID or selector.
 

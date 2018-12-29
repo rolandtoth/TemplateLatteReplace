@@ -1,4 +1,4 @@
-## bgimage
+# [Filter] bgimage
 
 Adds an inline style with background-image: url(...).
 

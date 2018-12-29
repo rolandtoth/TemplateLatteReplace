@@ -1,4 +1,4 @@
-## embedyoutube
+# [Filter] embedyoutube
 
 Generates markup for the [Light Youtube Embed](https://www.labnol.org/internet/light-youtube-embeds/27941/) method.
 

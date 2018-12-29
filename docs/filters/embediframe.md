@@ -1,4 +1,4 @@
-## embediframe
+# [Filter] embediframe
 
 Generates markup for responsive iframe embed. 
 
@@ -6,7 +6,7 @@ Apply the filter to the embed url (not the video url nor the whole embed code).
 Determines aspect ratio from width/height parameters and adds it as an inline style.
 Requires a few lines of additional CSS, see below.
 
-### Parameters (array):
+## Parameters
 
 - **width**: iframe width in pixels (get from embed code, default: 560)
 - **height**: iframe height in pixels (get from embed code, default: 315)
@@ -25,7 +25,7 @@ Requires a few lines of additional CSS, see below.
 {$url|embediframe: array('attr' => 'class="lazyload" allowfullscreen', 'wrapAttr' => 'class="embed-wrap video"', 'srcAttr' => 'data-src')|noescape}
 ```
 
-### CSS:
+## Styling
 
 ```CSS
 .embed-wrap {
@@ -45,7 +45,7 @@ Requires a few lines of additional CSS, see below.
 }
 ```
 
-### Generated markup
+## Generated markup
 
 **Default (no parameters)**:
 
@@ -59,7 +59,7 @@ Requires a few lines of additional CSS, see below.
 <div class="embed-wrap video"><div style="padding-bottom:56.25%"><iframe width="560" height="315" data-src="https://www.youtube.com/embed/IHqnLQy9R1A" class="lazyload" allowfullscreen></iframe></div></div>
 ```
 
-### Default values
+## Default values
 
 You can set default values by adding a `$view->embediframeDefaults` array, eg. in ready.php file:
 
@@ -67,11 +67,11 @@ You can set default values by adding a `$view->embediframeDefaults` array, eg. i
 $view->embediframeDefaults = array(
     'width'    => 600,
     'height'   => 480,
-    'wrapAttr' => 'class="iframe-wrapper"',
+    'wrapAttr' => 'class="iframe-wrapper"'
 );
 ```
 
-### Tips
+## Tips
 
 - adjust the wrapper element width to set the iframe width (in CSS)
 - to lazyload iframes width [Lazysizes](https://github.com/aFarkas/lazysizes) add the class `lazyload` and set `srcAttr` to `data-src` (plus include lazysizes.js too)

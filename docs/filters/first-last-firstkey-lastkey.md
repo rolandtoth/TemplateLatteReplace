@@ -1,4 +1,4 @@
-## first, last, firstkey, lastkey
+# [Filter] first, last, firstkey, lastkey
 
 Returns the first or last item of an array. If the data supplied is not an array, returns the original data.
 

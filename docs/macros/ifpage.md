@@ -1,4 +1,4 @@
-## ifpage
+# [Macro] ifpage
 
 An IF condition to check if a given page exists. Also sets a `$p` variable if yes. You can use `else` for the false part.
 

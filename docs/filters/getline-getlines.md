@@ -1,4 +1,4 @@
-## getline, getlines
+# [Filter] getline, getlines
 
 The getlines filter explodes lines of a textarea field into an array, optionally with a filter to retrieve specific items only.
 

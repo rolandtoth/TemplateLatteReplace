@@ -11,8 +11,15 @@
   	:root {
 	  --base-font-size: 15px;
 	  --sidebar-width: 24rem;
-	  --content-max-width: 60em;
+	  --content-max-width: 66em;
+    --sidebar-name-color: white;
+    --sidebar-name-text-align: left;
+    --sidebar-border-width: 0;
+    --sidebar-nav-link-background-color--active: #283339;
+    --sidebar-nav-link-margin: 0;
+    --sidebar-nav-link-border-width--active: 0;
 	}
+
 	::-webkit-scrollbar {
 	    width: 6px;
 	    height: 6px;
@@ -43,7 +50,7 @@
       subMaxLevel: 2,
       auto2top: true,
       search: {
-	    depth: 2,
+	      depth: 2,
         hideOtherSidebarContent: false
       }
     }

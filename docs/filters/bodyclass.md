@@ -1,4 +1,4 @@
-## bodyclass
+# [Filter] bodyclass
 
 Adds some classes to the element (preferably to the "body") reflecting the page ID, template and user language, page number (if applicable) and $view->viewFile:
 

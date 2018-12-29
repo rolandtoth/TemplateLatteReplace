@@ -24,7 +24,7 @@ Template php files will serve as controllers which load the identically named vi
 
 These "controllers" provide data for view files through a $view object.
 
-*Example: pass $subPages to view file and loop through it. In the view file `$view->subPages` become `$subPages`*.
+*Example: pass $subPages to view file and loop through it. In the view file `$view->subPages` will be available as `$subPages`*.
 
 ```php
 // home.php

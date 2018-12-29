@@ -1,4 +1,4 @@
-## pages
+# [Macro] pages
 
 Simlar to the "page" filter but returns a PageArray (loaded to "$pArr") instead of a single page. Under the hood it uses the $pages->find() API command.
 

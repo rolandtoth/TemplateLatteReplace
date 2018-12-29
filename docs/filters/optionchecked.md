@@ -1,4 +1,4 @@
-## optionchecked
+# [Filter] optionchecked
 
 Check if a Select Options field on a page has a given option selected.
 

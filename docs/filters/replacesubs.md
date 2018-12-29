@@ -1,4 +1,4 @@
-## replacesubs
+# [Filter] replacesubs
 
 Allows adding placeholders in format `((item))` to fields to replace them with data coming from an array. Mainly for replacing placeholders in CKEditor content, eg. with global contact data, social links, etc.
 

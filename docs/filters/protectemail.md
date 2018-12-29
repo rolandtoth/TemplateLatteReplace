@@ -1,4 +1,4 @@
-## protectemail
+# [Filter] protectemail
 
 Protects email with different methods (javascript/js, javascript_charcode, hex, drupal, texy). 
 Defaults to `javascript` mode.

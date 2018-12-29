@@ -1,4 +1,4 @@
-## group
+# [Filter] group
 
 Allows creating groups from a PageArray based on a page field value. This can be handy if you would like to output pages grouped by category or other value.
 

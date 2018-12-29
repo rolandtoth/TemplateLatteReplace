@@ -1,4 +1,4 @@
-## bgset
+# [Filter] bgset
 
 Adds `data-bgset` tag to elements to be used with [Lazysizes bgset plugin](https://github.com/aFarkas/lazysizes/tree/gh-pages/plugins/bgset). 
 

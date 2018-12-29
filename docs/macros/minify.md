@@ -1,4 +1,4 @@
-## minify
+# [Macro] minify
 
 Minifies markup by removing whitespace and optionally performs other tweaks. Can be applied partially to sections or individual HTML tags.
 

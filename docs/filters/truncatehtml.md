@@ -1,4 +1,4 @@
-## truncatehtml
+# [Filter] truncatehtml
 
 Truncates html string. Unlike the built-in [truncate](https://latte.nette.org/en/filters#toc-truncate) filter it adds closing html tags to the end.
 

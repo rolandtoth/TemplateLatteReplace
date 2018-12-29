@@ -1,4 +1,4 @@
-## sanitize
+# [Filter] sanitize
 
 Applies ProcessWire's sanitizer. The alias "sanitizer" can also be used.
 

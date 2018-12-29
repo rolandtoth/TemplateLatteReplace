@@ -1,4 +1,4 @@
-## ifstatus
+# [Macro] ifstatus
 
 Macro to check page status. Accepts a page ID or Page object as the first parameter, and a status as the second.
 

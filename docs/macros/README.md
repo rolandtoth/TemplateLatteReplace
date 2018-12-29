@@ -1,3 +1,5 @@
 # Macros
 
-The module comes with a few helper macros besides the built-in ones. If you don't need them you can disable in the module's settings page.
+The module comes with a few helper macros besides the built-in ones.
+
+Select a macro from the left sidebar to see its details.

@@ -1,4 +1,4 @@
-## localname
+# [Filter] localname
 
 This is a helper filter to avoid empty localnames in multilanguage setups.
 

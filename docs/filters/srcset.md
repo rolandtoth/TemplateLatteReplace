@@ -1,4 +1,4 @@
-## srcset
+# [Filter] srcset
 
 Generate image variations and markup for the "data-srcset" or "data-bgset" attribute (requires [Lazysizes](https://github.com/aFarkas/lazysizes)).
 
