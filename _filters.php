@@ -481,6 +481,7 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
     $class = isset($args['class']) ? $args['class'] : 'breadcrumb';
     $id = isset($args['id']) ? $args['id'] : '';
     $addAttributes = isset($args['addAttributes']) ? true : false;
+    $field = isset($args['field']) ? $args['field'] : 'title';
 
     if ('' !== $id) {
         $id = ' id="' . $id . '"';
@@ -517,12 +518,12 @@ $view->addFilter('breadcrumb', function ($p = null, $args = null) {
     };
 
     foreach ($parents as $parent) {
-        $markup .= '<li' . $getAttributes($parent->id) . '><a href="' . $parent->url . '">' . $parent->title . '</a></li>';
+        $markup .= '<li' . $getAttributes($parent->id) . '><a href="' . $parent->url . '">' . $parent->get($field) . '</a></li>';
     }
 
     if ($addCurrent) {
         $markup .= '<li' . $getAttributes($p->id) . '>';
-        $markup .= $addCurrentLink ? '<a href="' . $p->url . '">' . $p->title . '</a>' : '<span>' . $p->title . '</span>';
+        $markup .= $addCurrentLink ? '<a href="' . $p->url . '">' . $p->get($field) . '</a>' : '<span>' . $p->get($field) . '</span>';
         $markup .= '</li>';
     }
 
