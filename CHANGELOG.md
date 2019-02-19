@@ -1,6 +1,19 @@
 # Changelog
 
 
+### 0.6.1 (2019-02-19)
+
+- ignore templates by exact match (suggested by Sergio)
+- ignore `*.tpl.php` templates by default
+
+
+
+### 0.6.0 (2019-02-09)
+
+- Allow customization of breadcrumb display field (PR #4 by @philippdaun)
+
+
+
 ### 0.5.9 (2018-04-24)
 
 - added "replacevalues" filter

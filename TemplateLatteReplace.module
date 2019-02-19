@@ -37,7 +37,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'summary'  => __('Latte template engine support for ProcessWire.', __FILE__),
             'href'     => '',
             'author'   => 'Roland Toth',
-            'version'  => 60,
+            'version'  => '0.6.1',
             'requires' => 'PHP>=7.0.0, ProcessWire>=3.0.0',
             'autoload' => true,
             'singular' => true,
@@ -172,17 +172,19 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $markup = '';
         $templateFile = $event->object;
 
+        if (strpos($templateFile->filename, '.tpl.php')) {
+            return;
+        }
+
         if ($templateFile->page->template->name === 'admin') {
             return;
         }
 
         if ('' !== $this->ignoredTemplates) {
-            $ignoredTemplates = explode(',', $this->ignoredTemplates);
-
-            foreach ($ignoredTemplates as $t) {
-                if (strpos($templateFile->filename, trim($t)) !== false) {
-                    return;
-                }
+            $ignoredTemplates = array_map('trim', explode(',', $this->ignoredTemplates));
+      
+            if (in_array($templateFile->page->template->name, $ignoredTemplates)) {
+                return;
             }
         }
 
