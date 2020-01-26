@@ -215,13 +215,15 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $latte->setTempDirectory($paths->cache . $this->cacheDir);
 
         // set default layout file (as of Latte 2.4)
-        $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
-            if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
-                $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
+	if ($this->defaultLayoutFile !== '') { // allow for no default layout file
+            $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
+                if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
+                    $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
 
-                return $path;
-            }
-        });
+                    return $path;
+                }
+	    });
+	}
 
         // make _'string' work in .latte files
         $latte->addFilter('translate', function () {
@@ -341,7 +343,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->collapsed = 2;
         $f->columnWidth = 33;
         $f->collapsed = Inputfield::collapsedNever;
-        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
+        $f->value = trim($data[$fieldName], '/\\');
         $wrapper->add($f);
 
         $fieldName = 'ignoredTemplates';
