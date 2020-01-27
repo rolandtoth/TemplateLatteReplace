@@ -172,6 +172,28 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $markup = '';
         $templateFile = $event->object;
 
+        $view = $this->wire($this->api_var);
+
+        $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFile->filename), '.php');
+
+        // enable template file with/without extension
+        $viewFile = str_replace('.latte', '', $viewFile);
+
+        // if first character is "/", set viewRootDir empty
+        if (substr($viewFile, 0, 2) === '//') {
+            $viewRootDir = '';
+            // remove the starting "//" characters
+            $viewFile = substr($viewFile, 2);
+        } else {
+            $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
+        }
+
+        $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
+
+        if (!file_exists($viewRootDir . $viewFile . '.latte')) {
+            return;
+        }
+
         if (strpos($templateFile->filename, '.tpl.php')) {
             return;
         }
