@@ -166,12 +166,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
     }
 
-
-    public function hookRender(HookEvent $event)
-    {
-        $markup = '';
-        $templateFile = $event->object;
-
+    private function getViewFile($templateFile) {
         $view = $this->wire($this->api_var);
 
         $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFile->filename), '.php');
@@ -190,7 +185,15 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
 
-        if (!file_exists($viewRootDir . $viewFile . '.latte')) {
+        return $viewRootDir . $viewFile . '.latte';
+    }
+
+    public function hookRender(HookEvent $event)
+    {
+        $markup = '';
+        $templateFile = $event->object;
+
+        if (!file_exists($this->getViewFile($templateFile))) {
             return;
         }
 
@@ -211,7 +214,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         }
 
         if ($templateFile->filename !== '') {
-            $markup = $this->renderLatteString($templateFile->filename);
+            $markup = $this->renderLatteString($templateFile);
         }
 
         $event->return = $markup;
@@ -258,33 +261,17 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
     /**
-     * @param $templateFilename
+     * @param $templateFile
      *
      * @return string
      */
-    public function renderLatteString($templateFilename)
+    public function renderLatteString($templateFile)
     {
 
         $latte = $this->getLatte();
         $view = $this->wire($this->api_var);
 
-        $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFilename), '.php');
-
-        // enable template file with/without extension
-        $viewFile = str_replace('.latte', '', $viewFile);
-
-        // if first character is "/", set viewRootDir empty
-        if (substr($viewFile, 0, 2) === '//') {
-            $viewRootDir = '';
-            // remove the starting "//" characters
-            $viewFile = substr($viewFile, 2);
-        } else {
-            $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
-        }
-
-        $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
-
-        $markup = $latte->renderToString($viewRootDir . $viewFile . '.latte', (array)$view);
+        $markup = $latte->renderToString($this->getViewFile($templateFile), (array)$view);
 
         if (isset($view->json_encode) && (bool)$view->json_encode) {
             $markup = json_encode($markup, $view->json_encode);
