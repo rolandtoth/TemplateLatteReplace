@@ -209,7 +209,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         if ('' !== $this->ignoredTemplates) {
             $ignoredTemplates = array_map('trim', explode(',', $this->ignoredTemplates));
       
-            if (in_array($templateFile->page->template->name, $ignoredTemplates)) {
+            if (in_array(basename($templateFile->filename,"." . $this->wire('config')->templateExtension), $ignoredTemplates)) {
                 return;
             }
         }
