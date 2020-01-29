@@ -1,7 +1,6 @@
 <?php namespace ProcessWire;
 
 use \Latte\Engine;
-// require_once 'Latte/Engine.php';
 require_once 'latte.php';
 
 /**
