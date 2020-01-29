@@ -235,8 +235,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $view = $this->wire($this->api_var);
         $paths = $this->wire('config')->paths;
 
-        // require_once __DIR__ . '/latte.php';
-
         $latte = new Engine;
         $latte->setTempDirectory($paths->cache . $this->cacheDir);
 
