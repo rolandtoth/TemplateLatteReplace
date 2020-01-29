@@ -1,6 +1,8 @@
 <?php namespace ProcessWire;
 
-use Latte\Engine;
+use \Latte\Engine;
+// require_once 'Latte/Engine.php';
+require_once 'latte.php';
 
 /**
  * Latte template engine support for ProcessWire.
@@ -234,21 +236,21 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $view = $this->wire($this->api_var);
         $paths = $this->wire('config')->paths;
 
-        require_once __DIR__ . '/latte/latte.php';
+        // require_once __DIR__ . '/latte.php';
 
         $latte = new Engine;
         $latte->setTempDirectory($paths->cache . $this->cacheDir);
 
         // set default layout file (as of Latte 2.4)
-	if ($this->defaultLayoutFile !== '') { // allow for no default layout file
+	    if ($this->defaultLayoutFile !== '') { // allow for no default layout file
             $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
                 if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
                     $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
 
                     return $path;
                 }
-	    });
-	}
+	        });
+	    }
 
         // make _'string' work in .latte files
         $latte->addFilter('translate', function () {
