@@ -126,10 +126,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public function ready()
     {
-        if ($this->wire('page')->template->name === 'admin') {
-            return;
-        }
-
         /**
          * Set new global api variable.
          * Always added to avoid php error.
@@ -164,13 +160,13 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $this->wire('config')->defaultTextdomain = $this->defaultTextdomain ?: $defaultData['defaultTextdomain'];
 
-        $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
+        $this->addHookAfter('Page::render', $this, 'hookPageRender');
     }
 
-    private function getViewFile($templateFile) {
+    private function getViewFile($page) {
         $view = $this->wire($this->api_var);
 
-        $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFile->filename), '.php');
+        $viewFile = isset($view->viewFile) ? $view->viewFile : $page->template;
 
         // enable template file with/without extension
         $viewFile = str_replace('.latte', '', $viewFile);
@@ -189,35 +185,28 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         return $viewRootDir . $viewFile . '.latte';
     }
 
-    public function hookRender(HookEvent $event)
+    public function hookPageRender(HookEvent $event)
     {
         $markup = '';
-        $templateFile = $event->object;
+        $page = $event->object;
 
-        if (!file_exists($this->getViewFile($templateFile))) {
+        if (!file_exists($this->getViewFile($page))) {
             return;
         }
 
-        if (strpos($templateFile->filename, '.tpl.php')) {
-            return;
-        }
-
-        if ($templateFile->page->template->name === 'admin') {
+        if (strpos($page->template->filename, '.tpl.php')) {
             return;
         }
 
         if ('' !== $this->ignoredTemplates) {
             $ignoredTemplates = array_map('trim', explode(',', $this->ignoredTemplates));
-      
-            if (in_array(basename($templateFile->filename,"." . $this->wire('config')->templateExtension), $ignoredTemplates)) {
+    
+            if (in_array($page->template, $ignoredTemplates)) {
                 return;
             }
         }
 
-        if ($templateFile->filename !== '') {
-            $markup = $this->renderLatteString($templateFile);
-        }
-
+        $markup = $this->renderLatteString($page);
         $event->return = $markup;
     }
 
