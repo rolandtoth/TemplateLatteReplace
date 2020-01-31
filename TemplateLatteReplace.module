@@ -126,6 +126,10 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public function ready()
     {
+        if ($this->wire('page')->template == 'admin') {
+            return;
+        }
+
         /**
          * Set new global api variable.
          * Always added to avoid php error.
