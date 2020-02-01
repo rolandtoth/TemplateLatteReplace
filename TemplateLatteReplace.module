@@ -105,6 +105,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     public function init()
     {
+        if(strpos($_SERVER['REQUEST_URI'], $this->wire('config')->urls->admin) === 0) {
+            // we are in the admin section so abort!
+            return;
+        }
+
         if (in_array('useLatteExtension', $this->options, true)) {
             $this->wire('config')->templateExtension = 'latte';
         }
@@ -126,10 +131,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public function ready()
     {
-        if ($this->wire('page')->template == 'admin') {
-            return;
-        }
-
         /**
          * Set new global api variable.
          * Always added to avoid php error.
@@ -382,7 +383,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
         $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
         $f->addOption('useLatteExtension',
-            __('Use `latte` extension - WARNING: rename "admin.php" to "admin.latte" manually!', __FILE__));
+            __('Use `latte` extension - Does not affect pages under the admin tree.', __FILE__));
 
         if (isset($data[$fieldName])) {
             $f->attr('value', $data[$fieldName]);
