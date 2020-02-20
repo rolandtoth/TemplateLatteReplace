@@ -1,6 +1,7 @@
 <?php namespace ProcessWire;
 
-use Latte\Engine;
+use \Latte\Engine;
+require_once 'latte.php';
 
 /**
  * Latte template engine support for ProcessWire.
@@ -57,7 +58,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
             'viewsDir'          => '',
             'defaultTextdomain' => '/site/templates/_strings.php',
             'defaultLayoutFile' => '@layout.latte',
-            'ignoredTemplates'  => 'form-builder, email-administrator, email-autoresponder, HannaCode, cart-add-product, cart-edit, order-customer-information, order-products-table, checkout-confirmation-html, email-invoice, cart-view, consoleCode, snippetRunner',
             'options'           => array(
                 'extraMacros',
                 'extraFilters'
@@ -104,6 +104,11 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
     public function init()
     {
+        if(strpos($_SERVER['REQUEST_URI'], $this->wire('config')->urls->admin) === 0) {
+            // we are in the admin section so abort!
+            return;
+        }
+
         if (in_array('useLatteExtension', $this->options, true)) {
             $this->wire('config')->templateExtension = 'latte';
         }
@@ -125,10 +130,6 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
      */
     public function ready()
     {
-        if ($this->wire('page')->template->name === 'admin') {
-            return;
-        }
-
         /**
          * Set new global api variable.
          * Always added to avoid php error.
@@ -163,35 +164,45 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
 
         $this->wire('config')->defaultTextdomain = $this->defaultTextdomain ?: $defaultData['defaultTextdomain'];
 
-        $this->addHookAfter('TemplateFile::render', $this, 'hookRender');
+        $this->addHookAfter('Page::render', $this, 'hookPageRender');
     }
 
+    private function getViewFile($page) {
+        $view = $this->wire($this->api_var);
 
-    public function hookRender(HookEvent $event)
+        $viewFile = isset($view->viewFile) ? $view->viewFile : $page->template;
+
+        // enable template file with/without extension
+        $viewFile = str_replace('.latte', '', $viewFile);
+
+        // if first character is "/", set viewRootDir empty
+        if (substr($viewFile, 0, 2) === '//') {
+            $viewRootDir = '';
+            // remove the starting "//" characters
+            $viewFile = substr($viewFile, 2);
+        } else {
+            $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
+        }
+
+        $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
+
+        return $viewRootDir . $viewFile . '.latte';
+    }
+
+    public function hookPageRender(HookEvent $event)
     {
         $markup = '';
-        $templateFile = $event->object;
+        $page = $event->object;
 
-        if (strpos($templateFile->filename, '.tpl.php')) {
+        if (!file_exists($this->getViewFile($page))) {
             return;
         }
 
-        if ($templateFile->page->template->name === 'admin') {
+        if (strpos($page->template->filename, '.tpl.php')) {
             return;
         }
 
-        if ('' !== $this->ignoredTemplates) {
-            $ignoredTemplates = array_map('trim', explode(',', $this->ignoredTemplates));
-      
-            if (in_array($templateFile->page->template->name, $ignoredTemplates)) {
-                return;
-            }
-        }
-
-        if ($templateFile->filename !== '') {
-            $markup = $this->renderLatteString($templateFile->filename);
-        }
-
+        $markup = $this->renderLatteString($page);
         $event->return = $markup;
     }
 
@@ -209,19 +220,19 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $view = $this->wire($this->api_var);
         $paths = $this->wire('config')->paths;
 
-        require_once __DIR__ . '/latte/latte.php';
-
         $latte = new Engine;
         $latte->setTempDirectory($paths->cache . $this->cacheDir);
 
         // set default layout file (as of Latte 2.4)
-        $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
-            if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
-                $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
+	    if ($this->defaultLayoutFile !== '') { // allow for no default layout file
+            $latte->addProvider('coreParentFinder', function ($template) use ($paths, $view) {
+                if (!$template->getReferenceType()) { // is not referenced, i.e. not included, is not layout itself, …
+                    $path = $this->removeDoubleSlashes($paths->templates . '/' . $this->viewsDir . '/' . $this->defaultLayoutFile);
 
-                return $path;
-            }
-        });
+                    return $path;
+                }
+	        });
+	    }
 
         // make _'string' work in .latte files
         $latte->addFilter('translate', function () {
@@ -234,33 +245,17 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
     }
 
     /**
-     * @param $templateFilename
+     * @param $templateFile
      *
      * @return string
      */
-    public function renderLatteString($templateFilename)
+    public function renderLatteString($templateFile)
     {
 
         $latte = $this->getLatte();
         $view = $this->wire($this->api_var);
 
-        $viewFile = isset($view->viewFile) ? $view->viewFile : basename(basename($templateFilename), '.php');
-
-        // enable template file with/without extension
-        $viewFile = str_replace('.latte', '', $viewFile);
-
-        // if first character is "/", set viewRootDir empty
-        if (substr($viewFile, 0, 2) === '//') {
-            $viewRootDir = '';
-            // remove the starting "//" characters
-            $viewFile = substr($viewFile, 2);
-        } else {
-            $viewRootDir = $this->wire('config')->paths->templates . $this->viewsDir . '/';
-        }
-
-        $viewRootDir = $this->removeDoubleSlashes($viewRootDir);
-
-        $markup = $latte->renderToString($viewRootDir . $viewFile . '.latte', (array)$view);
+        $markup = $latte->renderToString($this->getViewFile($templateFile), (array)$view);
 
         if (isset($view->json_encode) && (bool)$view->json_encode) {
             $markup = json_encode($markup, $view->json_encode);
@@ -341,23 +336,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->collapsed = 2;
         $f->columnWidth = 33;
         $f->collapsed = Inputfield::collapsedNever;
-        $f->value = !empty($data[$fieldName]) ? trim($data[$fieldName], '/\\') : $defaultData[$fieldName];
-        $wrapper->add($f);
-
-        $fieldName = 'ignoredTemplates';
-        $f = wire('modules')->get('InputfieldTextarea');
-        $f->attr('name', $fieldName);
-        $f->label = __('Ignored templates', __FILE__);
-        $f->description = __('Comma-separated list of templates (file names) that should not be rendered with Latte.',
-            __FILE__);
-        $f->notes = __('Defaults: ', __FILE__) . $defaultData['ignoredTemplates'];
-        $f->rows = 2;
-        $f->collapsed = 2;
-        $f->columnWidth = 100;
-        $f->collapsed = Inputfield::collapsedBlank;
-        if (isset($data[$fieldName])) {
-            $f->attr('value', $data[$fieldName]);
-        }
+        $f->value = trim($data[$fieldName], '/\\');
         $wrapper->add($f);
 
         $fieldName = 'defaultTextdomain';
@@ -379,7 +358,7 @@ class TemplateLatteReplace extends WireData implements Module, ConfigurableModul
         $f->addOption('extraMacros', __('Load additional macros', __FILE__) . ' `(n:page, n:pages, etc.)`');
         $f->addOption('extraFilters', __('Load additional filters', __FILE__) . ' `(getPage`, `getPages`, `etc.)`');
         $f->addOption('useLatteExtension',
-            __('Use `latte` extension - WARNING: rename "admin.php" to "admin.latte" manually!', __FILE__));
+            __('Use `latte` extension - Does not affect pages under the admin tree.', __FILE__));
 
         if (isset($data[$fieldName])) {
             $f->attr('value', $data[$fieldName]);
